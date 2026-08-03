@@ -1,62 +1,65 @@
-# Next.js + Webflow Cloud
+# TalentFlow AI Dash
 
-Example app for [Webflow Cloud](https://webflow.com/cloud): a Next.js + React project with OpenNext for Cloudflare and Webflow deploy tooling.
+TalentFlow is a premium bilingual recruitment demo built with Next.js, OpenNext, and Webflow Cloud. It showcases an AI-assisted hiring workspace with a dashboard, candidate profile, recruitment pipeline, and copilot experience for modern recruiting teams.
 
-[![Deploy to Webflow](https://webflow.com/img/deploy-dark.svg)](https://webflow.com/dashboard/cloud/deploy?repo=https://github.com/Webflow-Examples/hello-world-nextjs)
+> Demo disclaimer: candidate profiles, pipeline activity, and AI outputs shown in this experience are simulated for product presentation and demo purposes.
+
+## Routes
+
+- `/` — executive dashboard overview
+- `/pipeline` — interactive Kanban-style recruitment pipeline
+- `/candidate-profile` — premium candidate profile experience
+- `/copilot` — AI recruitment copilot workspace
+
+## Architecture
+
+- Next.js App Router for the UI shell and route structure
+- React components for reusable dashboard, pipeline, and copilot experiences
+- Local lightweight language state for EN/FR switching without extra i18n dependencies
+- OpenNext + Cloudflare/Wrangler configuration for Webflow Cloud deployment compatibility
 
 ## Project structure
 
 ```text
-.
-├── public/
-│   ├── next.svg
-│   └── webflow.svg
-├── src/
-│   └── app/
-│       ├── favicon.ico
-│       ├── globals.css
-│       ├── layout.tsx
-│       └── page.tsx
-├── nextjs/
-│   ├── public/
-│   │   └── next.svg
-│   ├── src/
-│   │   └── app/
-│   │       ├── favicon.ico
-│   │       ├── globals.css
-│   │       ├── layout.tsx
-│   │       └── page.tsx
-│   ├── cloudflare-env.d.ts
-│   ├── eslint.config.mjs
-│   ├── next.config.ts
-│   ├── open-next.config.ts
-│   ├── package.json
-│   ├── postcss.config.mjs
-│   ├── tsconfig.json
-│   ├── webflow.json
-│   └── wrangler.json
-├── cloudflare-env.d.ts
-├── eslint.config.mjs
-├── next.config.ts
-├── open-next.config.ts
-├── package.json
-├── postcss.config.mjs
-├── tsconfig.json
-├── webflow.json
-└── wrangler.json
+src/
+  app/
+    page.tsx
+    pipeline/page.tsx
+    candidate-profile/page.tsx
+    copilot/page.tsx
+  components/
+    dashboard/
+    layout/
+    recruitment/
+    copilot/
+    ui/
+  lib/
+    i18n.tsx
+next.config.ts
+open-next.config.ts
+package.json
+webflow.json
+wrangler.json
 ```
 
-## Commands
+## Local development
 
-| Command | Action |
-| --- | --- |
-| `npm install` | Install dependencies. |
-| `npm run dev` | Start the Next.js dev server ([http://localhost:3000](http://localhost:3000)). |
-| `npm run build` | Create a production build. |
-| `npm run start` | Run the production server locally (after `npm run build`). |
+```bash
+npm install
+npm run dev
+```
 
+The app will be available at http://localhost:3000.
 
-## Learn more
+## Build
 
-- [Next.js documentation](https://nextjs.org/docs)
-- [Webflow Cloud](https://webflow.com/cloud)
+```bash
+npm run build
+```
+
+## Deployment notes
+
+- The project is configured for Webflow Cloud using the existing Next.js + OpenNext + Wrangler setup.
+- The current deployment target is the repository’s main branch.
+- No deployment has been executed from this session.
+- Keep the existing visual design intact when making changes for production.
