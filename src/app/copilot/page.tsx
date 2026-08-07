@@ -1,9 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "../../components/layout/Sidebar";
 import { TopHeader } from "../../components/layout/TopHeader";
 import { CopilotWorkspace } from "../../components/copilot/CopilotWorkspace";
+
+function readInitialContext() {
+  if (typeof window === "undefined") {
+    return { candidateId: undefined, mode: undefined };
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  return {
+    candidateId: params.get("candidate") ?? undefined,
+    mode: params.get("mode") ?? undefined,
+  };
+}
 
 export default function CopilotPage() {
   const [language, setLanguage] = useState<"en" | "fr">("en");
@@ -22,6 +34,8 @@ export default function CopilotPage() {
     window.localStorage.setItem("talentflow-language", language);
   }, [hydrated, language]);
 
+  const initialContext = useMemo(() => readInitialContext(), []);
+
   return (
     <div className="app-shell">
       <Sidebar language={language} activeItem="copilot" />
@@ -34,7 +48,7 @@ export default function CopilotPage() {
         />
 
         <main className="main-content">
-          <CopilotWorkspace language={language} />
+          <CopilotWorkspace language={language} initialContext={initialContext} />
         </main>
       </div>
     </div>

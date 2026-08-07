@@ -46,7 +46,14 @@ wrangler.json
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
+```
+
+Set the required environment variable in your local environment before starting the app:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 The app will be available at http://localhost:3000.
@@ -63,3 +70,15 @@ npm run build
 - The current deployment target is the repository’s main branch.
 - No deployment has been executed from this session.
 - Keep the existing visual design intact when making changes for production.
+- Configure the following environment variable in Webflow Cloud before enabling the Copilot API route:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### Webflow Cloud setup
+
+1. Open the Webflow Cloud project environment settings.
+2. Add a new environment variable named OPENAI_API_KEY.
+3. Paste your OpenAI API key as the value.
+4. Redeploy the application so the runtime picks up the new variable.

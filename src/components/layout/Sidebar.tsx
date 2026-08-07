@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { translations } from "../../lib/i18n";
 import { Icon } from "../ui/Icon";
 
 type SidebarProps = {
@@ -28,6 +29,7 @@ export function Sidebar({ language, activeItem }: SidebarProps) {
   const items = navItems[language];
   const pathname = usePathname();
   const activePath = pathname || "/";
+  const copy = translations[language];
 
   return (
     <aside className="sidebar">
@@ -35,14 +37,14 @@ export function Sidebar({ language, activeItem }: SidebarProps) {
         <div className="brand-mark">TF</div>
         <div>
           <p className="brand-name">TalentFlow</p>
-          <p className="brand-subtitle">AI Recruitment</p>
+          <p className="brand-subtitle">{language === "en" ? "AI Recruitment" : "Recrutement IA"}</p>
         </div>
       </div>
 
       <div className="workspace-card">
         <div className="workspace-card__title-row">
           <span className="workspace-card__dot" />
-          <span>{language === "en" ? "Northstar Labs" : "Northstar Labs"}</span>
+          <span>Northstar Labs</span>
         </div>
         <p>{language === "en" ? "Growth hiring workspace" : "Espace de recrutement croissance"}</p>
       </div>
@@ -83,7 +85,7 @@ export function Sidebar({ language, activeItem }: SidebarProps) {
             <p>Sabrina H.</p>
             <span>{language === "en" ? "Head of Talent" : "Responsable RH"}</span>
           </div>
-          <button type="button" className="icon-button" aria-label="Settings">
+          <button type="button" className="icon-button" aria-label={copy.settings}>
             <Icon name="settings" size={16} />
           </button>
         </div>

@@ -12,10 +12,12 @@ import { InsightsPanel } from "../components/recruitment/InsightsPanel";
 import { PriorityActions } from "../components/recruitment/PriorityActions";
 import Link from "next/link";
 import { translations } from "../lib/i18n";
+import { useDemoExperience } from "../lib/demoExperience";
 
 export default function Home() {
   const [language, setLanguage] = useState<"en" | "fr">("en");
   const [hydrated, setHydrated] = useState(false);
+  const { state } = useDemoExperience();
 
   useEffect(() => {
     const stored = window.localStorage.getItem("talentflow-language");
@@ -64,6 +66,7 @@ export default function Home() {
               </p>
               <div className="candidate-summary__chips" style={{ marginTop: "14px" }}>
                 <span className="demo-pill">{translations[language].demoLabel}</span>
+                {state.lastAction ? <span className="demo-pill">{state.lastAction}</span> : null}
                 <Link href="/candidate-profile" className="btn btn--primary">
                   {language === "en" ? "Open AI candidate profile" : "Ouvrir le profil IA du candidat"}
                 </Link>

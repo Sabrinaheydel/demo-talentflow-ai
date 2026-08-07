@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Badge } from "../ui/Badge";
 import { Icon } from "../ui/Icon";
+import { useDemoExperience } from "../../lib/demoExperience";
 
 type CandidateStatus = "Applied" | "Screening" | "Interview" | "Offer" | "Hired";
 
@@ -24,11 +25,11 @@ const candidateSeed: Candidate[] = [
   {
     id: 1,
     name: "Maya Chen",
-    role: "Senior Product Engineer",
+    role: "Senior Product Designer",
     match: 96,
     status: "Interview",
-    recruiter: "Nina Patel",
-    activity: "Portfolio reviewed • 2h ago",
+    recruiter: "Sarah Martin",
+    activity: "Final interview prep • 2h ago",
     priority: "Urgent",
     urgent: true,
     location: "New York, US",
@@ -57,14 +58,13 @@ const candidateSeed: Candidate[] = [
   },
   {
     id: 4,
-    name: "Noah Bennett",
-    role: "Engineering Manager",
-    match: 94,
-    status: "Offer",
-    recruiter: "Sage Chen",
-    activity: "Compensation review • 1d ago",
-    priority: "Urgent",
-    urgent: true,
+    name: "Noah Williams",
+    role: "Product Manager",
+    match: 88,
+    status: "Interview",
+    recruiter: "David Klein",
+    activity: "Culture interview prep • 1d ago",
+    priority: "Medium",
     location: "Remote • Canada",
   },
   {
@@ -98,17 +98,20 @@ type PipelineBoardProps = {
 };
 
 export function PipelineBoard({ language }: PipelineBoardProps) {
+  const { addStoryStep } = useDemoExperience();
   const [search, setSearch] = useState("");
   const [jobFilter, setJobFilter] = useState("all");
   const [recruiterFilter, setRecruiterFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"match" | "priority" | "activity">("priority");
+  const [toast, setToast] = useState<string | null>(null);
+  const [modal, setModal] = useState<{ title: string; description: string; confirmLabel: string; message: string } | null>(null);
 
   const copy = language === "en"
     ? {
         title: "Recruitment pipeline",
         subtitle: "A premium command center for high-signal hiring opportunities.",
         insight: "AI recommendation",
-        insightText: "Prioritize Maya Chen and Noah Bennett for this week’s executive review to protect momentum.",
+        insightText: "Prioritize Maya Chen and Noah Williams for this week’s executive review to protect momentum.",
         searchPlaceholder: "Search candidates",
         allJobs: "All roles",
         allRecruiters: "All recruiters",
@@ -140,7 +143,7 @@ export function PipelineBoard({ language }: PipelineBoardProps) {
         title: "Pipeline de recrutement",
         subtitle: "Un centre de commande premium pour les opportunités à fort signal.",
         insight: "Recommandation IA",
-        insightText: "Priorisez Maya Chen et Noah Bennett pour la revue exécutive de cette semaine afin de préserver l’élan.",
+        insightText: "Priorisez Maya Chen et Noah Williams pour la revue exécutive de cette semaine afin de préserver l’élan.",
         searchPlaceholder: "Rechercher un candidat",
         allJobs: "Tous les postes",
         allRecruiters: "Tous les recruteurs",
@@ -248,7 +251,7 @@ export function PipelineBoard({ language }: PipelineBoardProps) {
         </label>
 
         <label className="pipeline-toolbar__field">
-          <span>{language === "en" ? "Job" : "Poste"}</span>
+          <span>{language === "en" ? "Role" : "Poste"}</span>
           <select value={jobFilter} onChange={(event) => setJobFilter(event.target.value)}>
             <option value="all">{copy.allJobs}</option>
             {jobs.map((job) => (
@@ -280,7 +283,18 @@ export function PipelineBoard({ language }: PipelineBoardProps) {
           </select>
         </label>
 
-        <button type="button" className="btn btn--primary" disabled>
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={() => setModal({
+            title: language === "en" ? "Add candidate" : "Ajouter un candidat",
+            description: language === "en"
+              ? "This demo action opens a lightweight intake flow for adding a new candidate to the active pipeline."
+              : "Cette action de démonstration ouvre un flux d’intégration léger pour ajouter un nouveau candidat au pipeline actif.",
+            confirmLabel: language === "en" ? "Add" : "Ajouter",
+            message: language === "en" ? "Candidate intake started" : "Intake candidat démarrée",
+          })}
+        >
           {copy.addCandidate}
         </button>
       </section>
@@ -377,6 +391,25 @@ export function PipelineBoard({ language }: PipelineBoardProps) {
           })}
         </section>
       )}
+
+      {modal ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h4>{modal.title}</h4>
+            <p>{modal.description}</p>
+            <div className="modal-actions">
+              <button type="button" className="btn btn--secondary" onClick={() => setModal(null)}>
+                {language === "en" ? "Cancel" : "Annuler"}
+              </button>
+              <button type="button" className="btn btn--primary" onClick={() => { addStoryStep(language === "en" ? "Candidate intake started" : "Intake candidat démarrée"); setToast(modal.message); setModal(null); }}>
+                {modal.confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? <div className="toast" role="status">{toast}</div> : null}
     </div>
   );
 }

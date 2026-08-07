@@ -1,44 +1,27 @@
 import Link from "next/link";
+import { canonicalCandidates } from "../../lib/demoData";
 
 type RecentCandidatesTableProps = {
   language: "en" | "fr";
 };
 
-const candidates = [
+const recentCandidates = [
   {
-    name: "Maya Chen",
-    role: "Senior Product Designer",
-    initials: "MC",
+    candidateId: "maya-chen",
     stage: "Interview",
     stageFr: "Entretien",
-    aiScore: "96",
-    probability: "91%",
-    recruiter: "Nadia",
-    activity: "2h ago",
     status: "strong" as const,
   },
   {
-    name: "Luca Martin",
-    role: "Frontend Engineer",
-    initials: "LM",
-    stage: "Offer pending",
-    stageFr: "Offre en attente",
-    aiScore: "94",
-    probability: "88%",
-    recruiter: "Owen",
-    activity: "4h ago",
+    candidateId: "lucas-martin",
+    stage: "Technical interview",
+    stageFr: "Entretien technique",
     status: "review" as const,
   },
   {
-    name: "Amina Diallo",
-    role: "Revenue Operations Lead",
-    initials: "AD",
-    stage: "Screening",
-    stageFr: "Pré-sélection",
-    aiScore: "92",
-    probability: "84%",
-    recruiter: "Sara",
-    activity: "Today",
+    candidateId: "emma-laurent",
+    stage: "Hiring manager interview",
+    stageFr: "Entretien avec le manager",
     status: "watch" as const,
   },
 ];
@@ -58,28 +41,33 @@ export function RecentCandidatesTable({ language }: RecentCandidatesTableProps) 
           </tr>
         </thead>
         <tbody>
-          {candidates.map((candidate) => (
-            <tr key={candidate.name}>
-              <td>
-                <Link href={candidate.name === "Maya Chen" ? "/candidate-profile" : "#"} className="candidate-cell candidate-link">
-                  <div className="avatar">{candidate.initials}</div>
-                  <div>
-                    <p>{candidate.name}</p>
-                    <span>{candidate.role}</span>
-                  </div>
-                </Link>
-              </td>
-              <td>
-                <span className={`status-pill status-pill--${candidate.status}`}>
-                  {language === "en" ? candidate.stage : candidate.stageFr}
-                </span>
-              </td>
-              <td>{candidate.aiScore}/100</td>
-              <td>{candidate.probability}</td>
-              <td>{candidate.recruiter}</td>
-              <td>{candidate.activity}</td>
-            </tr>
-          ))}
+          {recentCandidates.map((candidate) => {
+            const canonical = canonicalCandidates.find((item) => item.id === candidate.candidateId);
+            if (!canonical) return null;
+
+            return (
+              <tr key={canonical.id}>
+                <td>
+                  <Link href={canonical.id === "maya-chen" ? "/candidate-profile" : "#"} className="candidate-cell candidate-link">
+                    <div className="avatar">{canonical.name.split(" ").map((part) => part[0]).join("").slice(0, 2)}</div>
+                    <div>
+                      <p>{canonical.name}</p>
+                      <span>{canonical.role}</span>
+                    </div>
+                  </Link>
+                </td>
+                <td>
+                  <span className={`status-pill status-pill--${candidate.status}`}>
+                    {language === "en" ? candidate.stage : candidate.stageFr}
+                  </span>
+                </td>
+                <td>{canonical.match}/100</td>
+                <td>{`${canonical.probability}%`}</td>
+                <td>{canonical.recruiters.join(" + ")}</td>
+                <td>{canonical.interviewDate}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

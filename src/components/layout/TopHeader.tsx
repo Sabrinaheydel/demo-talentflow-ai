@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Icon } from "../ui/Icon";
-import { useLanguage } from "../../lib/i18n";
+import { translations, useLanguage } from "../../lib/i18n";
+import { useDemoExperience } from "../../lib/demoExperience";
 
 type TopHeaderProps = {
   language: "en" | "fr";
@@ -13,6 +15,10 @@ export function TopHeader({
   onLanguageChange,
 }: TopHeaderProps) {
   const { setLanguage } = useLanguage();
+  const { resetDemo } = useDemoExperience();
+  const [toast, setToast] = useState<string | null>(null);
+  const [modal, setModal] = useState<{ title: string; description: string; confirmLabel: string; message: string } | null>(null);
+  const copy = translations[language];
 
   const handleLanguageChange = (value: "en" | "fr") => {
     onLanguageChange(value);
@@ -29,11 +35,11 @@ export function TopHeader({
       </div>
 
       <div className="top-header__actions">
-        <button type="button" className="icon-button icon-button--soft" aria-label="Notifications">
+        <button type="button" className="icon-button icon-button--soft" aria-label={copy.notifications}>
           <Icon name="bell" size={16} />
           <span className="badge-dot" />
         </button>
-        <div className="language-switch" role="tablist" aria-label="Language switch">
+        <div className="language-switch" role="tablist" aria-label={copy.languageSwitch}>
           <button
             type="button"
             className={currentLanguage === "en" ? "is-active" : ""}
@@ -49,10 +55,50 @@ export function TopHeader({
             FR
           </button>
         </div>
-        <button type="button" className="btn btn--secondary" disabled>
-          {language === "en" ? "Export report" : "Exporter le rapport"}
+        <button
+          type="button"
+          className="btn btn--secondary"
+          onClick={() => setModal({
+            title: copy.exportReport,
+            description: language === "en"
+              ? "This demo action packages the current hiring snapshot into a polished report for stakeholders."
+              : "Cette action de démonstration prépare un rapport soigné du snapshot actuel pour les parties prenantes.",
+            confirmLabel: copy.exportReport,
+            message: language === "en" ? "Report exported for demo review" : "Rapport exporté pour la démo",
+          })}
+        >
+          {copy.exportReport}
+        </button>
+        <button
+          type="button"
+          className="btn btn--ghost"
+          onClick={() => {
+            resetDemo();
+            setToast(language === "en" ? "Demo reset to the baseline story" : "Démo réinitialisée au scénario de base");
+          }}
+        >
+          {copy.resetDemo}
         </button>
       </div>
+
+      {modal ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h4>{modal.title}</h4>
+            <p>{modal.description}</p>
+            <div className="modal-actions">
+              <button type="button" className="btn btn--secondary" onClick={() => setModal(null)}>
+                {copy.cancel}
+              </button>
+              <button type="button" className="btn btn--primary" onClick={() => { setToast(modal.message); setModal(null); }}>
+                {modal.confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? <div className="toast" role="status">{toast}</div> : null}
     </header>
   );
 }

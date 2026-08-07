@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { Sidebar } from "../../components/layout/Sidebar";
 import { Badge } from "../../components/ui/Badge";
 import { Card } from "../../components/ui/Card";
+import { getCanonicalCandidateById } from "../../lib/demoData";
+import { translations } from "../../lib/i18n";
+import { useDemoExperience } from "../../lib/demoExperience";
 
 const experienceTimeline = [
   {
@@ -78,8 +81,13 @@ const activity = [
 ];
 
 export default function CandidateProfilePage() {
+  const mayaCandidate = getCanonicalCandidateById("maya-chen");
   const [language, setLanguage] = useState<"en" | "fr">("en");
+  const { state, togglePrepared, requestFeedback, scheduleInterview, completeInterview } = useDemoExperience();
+  const uiCopy = translations[language];
   const [hydrated, setHydrated] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [modal, setModal] = useState<{ title: string; description: string; confirmLabel: string; message: string } | null>(null);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("talentflow-language");
@@ -123,9 +131,9 @@ export default function CandidateProfilePage() {
         summaryBadge: "Recruiter ready",
         locationValue: "Remote • New York, US",
         salaryValue: "$210k — $240k",
-        roleValue: "Senior Product Engineer",
+        roleValue: mayaCandidate.role,
         name: "Maya Chen",
-        probabilityValue: "86%",
+        probabilityValue: `${mayaCandidate.probability}%`,
         probabilityLabel: "High confidence",
         notesList: [
           "Excellent communicator with strong executive presence.",
@@ -161,9 +169,9 @@ export default function CandidateProfilePage() {
         summaryBadge: "Prêt recruteur",
         locationValue: "Télétravail • New York, États-Unis",
         salaryValue: "210k$ — 240k$",
-        roleValue: "Ingénieure produit senior",
+        roleValue: mayaCandidate.role,
         name: "Maya Chen",
-        probabilityValue: "86%",
+        probabilityValue: `${mayaCandidate.probability}%`,
         probabilityLabel: "Haute confiance",
         notesList: [
           "Excellente communicante avec une forte présence auprès des dirigeants.",
@@ -185,7 +193,7 @@ export default function CandidateProfilePage() {
           </div>
 
           <div className="top-header__actions">
-            <div className="language-switch" role="tablist" aria-label="Language switch">
+            <div className="language-switch" role="tablist" aria-label={uiCopy.languageSwitch}>
               <button
                 type="button"
                 className={language === "en" ? "is-active" : ""}
@@ -201,10 +209,35 @@ export default function CandidateProfilePage() {
                 FR
               </button>
             </div>
-            <button type="button" className="btn btn--secondary">
+            <button
+              type="button"
+              className="btn btn--secondary"
+              onClick={() => setModal({
+                title: copy.exportAction,
+                description: language === "en"
+                  ? "This demo action exports the candidate notes and AI signals into a recruiter-ready package."
+                  : "Cette action de démonstration exporte les notes du candidat et les signaux IA dans un package prêt recruteur.",
+                confirmLabel: language === "en" ? "Export" : "Exporter",
+                message: language === "en" ? "Notes exported for review" : "Notes exportées pour examen",
+              })}
+            >
               {copy.exportAction}
             </button>
-            <button type="button" className="btn btn--primary">
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => {
+                scheduleInterview("maya-chen");
+                setModal({
+                  title: copy.profileAction,
+                  description: language === "en"
+                    ? "This demo action opens the scheduling workflow for the next interview conversation."
+                    : "Cette action de démonstration ouvre le flux de planification pour la prochaine conversation d’entretien.",
+                  confirmLabel: language === "en" ? "Schedule" : "Planifier",
+                  message: language === "en" ? "Interview scheduling opened" : "Planification d’entretien ouverte",
+                });
+              }}
+            >
               {copy.profileAction}
             </button>
           </div>
@@ -231,7 +264,7 @@ export default function CandidateProfilePage() {
             <div className="candidate-hero__insights">
               <div className="candidate-score-card">
                 <p>{copy.match}</p>
-                <strong>96%</strong>
+                <strong>{mayaCandidate.match}%</strong>
               </div>
               <div className="candidate-score-card candidate-score-card--soft">
                 <p>{copy.probability}</p>
@@ -245,14 +278,15 @@ export default function CandidateProfilePage() {
               <div className="candidate-summary-card">
                 <p>{copy.summaryText}</p>
                 <div className="candidate-summary__chips">
-                  <Badge label="AI-powered" tone="success" />
-                  <Badge label="Leadership-ready" tone="warning" />
-                  <Badge label="High signal" tone="neutral" />
+                  <Badge label={language === "en" ? "AI-powered" : "Piloté par l’IA"} tone="success" />
+                  <Badge label={language === "en" ? "Leadership-ready" : "Prêt pour le leadership"} tone="warning" />
+                  <Badge label={language === "en" ? "High signal" : "Signal fort"} tone="neutral" />
+                  {state.candidates["maya-chen"]?.prepared ? <Badge label={language === "en" ? "Prepared" : "Préparé"} tone="success" /> : null}
                 </div>
               </div>
             </Card>
 
-            <Card title={copy.skills} description="Signal strength across the role profile">
+            <Card title={copy.skills} description={language === "en" ? "Signal strength across the role profile" : "Force du signal sur le profil du poste"}>
               <div className="skill-list">
                 {skillMatrix.map((skill) => (
                   <div key={skill.name} className="skill-row">
@@ -270,7 +304,7 @@ export default function CandidateProfilePage() {
           </div>
 
           <div className="content-grid">
-            <Card title={copy.experience} description="Career progression and leadership context">
+            <Card title={copy.experience} description={language === "en" ? "Career progression and leadership context" : "Évolution de carrière et contexte de leadership"}>
               <div className="timeline-list">
                 {experienceTimeline.map((item) => (
                   <div key={item.title} className="timeline-item">
@@ -288,12 +322,12 @@ export default function CandidateProfilePage() {
               </div>
             </Card>
 
-            <Card title={copy.probability} description="Current confidence from the hiring model">
+            <Card title={copy.probability} description={language === "en" ? "Current confidence from the hiring model" : "Niveau de confiance actuel du modèle RH"}>
               <div className="probability-card">
                 <div className="probability-card__value">{copy.probabilityValue}</div>
                 <p>{copy.probabilityLabel}</p>
                 <div className="probability-meter">
-                  <div className="probability-meter__fill" style={{ width: "86%" }} />
+                  <div className="probability-meter__fill" style={{ width: `${mayaCandidate.probability}%` }} />
                 </div>
                 <div className="probability-card__meta">
                   <span>Strong hiring intent</span>
@@ -304,15 +338,16 @@ export default function CandidateProfilePage() {
           </div>
 
           <div className="content-grid">
-            <Card title={copy.notes} description="Signals surfaced during recent conversations">
+            <Card title={copy.notes} description={language === "en" ? "Signals surfaced during recent conversations" : "Signaux révélés lors des conversations récentes"}>
               <ul className="bullet-list">
                 {copy.notesList.map((note) => (
                   <li key={note}>{note}</li>
                 ))}
+                <li>{language === "en" ? "Latest demo action: " : "Dernière action de démo : "}{state.lastAction ?? (language === "en" ? "No action yet" : "Aucune action pour l’instant")}</li>
               </ul>
             </Card>
 
-            <Card title={copy.recommendations} description="AI-recommended next moves">
+            <Card title={copy.recommendations} description={language === "en" ? "AI-recommended next moves" : "Prochaines étapes recommandées par l’IA"}>
               <div className="stack-list">
                 {recommendations.map((item) => (
                   <div key={item.title} className="recommendation-card">
@@ -330,7 +365,7 @@ export default function CandidateProfilePage() {
           </div>
 
           <div className="content-grid">
-            <Card title={copy.risks} description="Potential blockers to address early">
+            <Card title={copy.risks} description={language === "en" ? "Potential blockers to address early" : "Bloqueurs potentiels à traiter tôt"}>
               <ul className="bullet-list bullet-list--warning">
                 {risks.map((risk) => (
                   <li key={risk}>{risk}</li>
@@ -338,7 +373,7 @@ export default function CandidateProfilePage() {
               </ul>
             </Card>
 
-            <Card title={copy.questions} description="Conversation starters for the next interview">
+            <Card title={copy.questions} description={language === "en" ? "Conversation starters for the next interview" : "Points de départ pour le prochain entretien"}>
               <ul className="bullet-list bullet-list--accent">
                 {questions.map((question) => (
                   <li key={question}>{question}</li>
@@ -348,7 +383,12 @@ export default function CandidateProfilePage() {
           </div>
 
           <div className="content-grid">
-            <Card title={copy.documents} description="Material readiness and source links">
+            <Card title={copy.documents} description={language === "en" ? "Material readiness and source links" : "Préparation des documents et liens sources"}>
+              <div className="interview-actions" style={{ marginBottom: "12px" }}>
+                <button type="button" className="btn btn--secondary" onClick={() => togglePrepared("maya-chen")}>{state.candidates["maya-chen"]?.prepared ? (language === "en" ? "Prepared" : "Préparé") : (language === "en" ? "Mark as prepared" : "Marquer comme préparé")}</button>
+                <button type="button" className="btn btn--secondary" onClick={() => requestFeedback("maya-chen")}>{state.candidates["maya-chen"]?.feedbackRequested ? (language === "en" ? "Feedback requested" : "Feedback demandé") : (language === "en" ? "Request feedback" : "Demander un feedback")}</button>
+                <button type="button" className="btn btn--primary" onClick={() => completeInterview("maya-chen")}>{language === "en" ? "Complete interview" : "Terminer l’entretien"}</button>
+              </div>
               <div className="document-list">
                 {documents.map((document) => (
                   <div key={document.label} className="document-card">
@@ -357,14 +397,14 @@ export default function CandidateProfilePage() {
                       <p>{document.type}</p>
                     </div>
                     <button type="button" className="btn btn--ghost">
-                      Open
+                      {uiCopy.open}
                     </button>
                   </div>
                 ))}
               </div>
             </Card>
 
-            <Card title={copy.activity} description="The latest recruiting signals on this profile">
+            <Card title={copy.activity} description={language === "en" ? "The latest recruiting signals on this profile" : "Les derniers signaux de recrutement sur ce profil"}>
               <div className="timeline-list timeline-list--compact">
                 {activity.map((item) => (
                   <div key={item.title} className="timeline-item">
@@ -383,6 +423,25 @@ export default function CandidateProfilePage() {
           </div>
         </main>
       </div>
+
+      {modal ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h4>{modal.title}</h4>
+            <p>{modal.description}</p>
+            <div className="modal-actions">
+              <button type="button" className="btn btn--secondary" onClick={() => setModal(null)}>
+                {language === "en" ? "Cancel" : "Annuler"}
+              </button>
+              <button type="button" className="btn btn--primary" onClick={() => { setToast(modal.message); setModal(null); }}>
+                {modal.confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? <div className="toast" role="status">{toast}</div> : null}
     </div>
   );
 }
