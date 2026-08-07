@@ -1481,6 +1481,239 @@ textarea:focus-visible {
   gap: 10px;
 }
 
+.copilot-empty-output {
+  padding: 14px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.copilot-empty-output strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.copilot-empty-output p {
+  margin: 0;
+  color: #475569;
+}
+
+.copilot-review-note {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.copilot-artifact {
+  display: grid;
+  gap: 12px;
+}
+
+.artifact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.artifact-header h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.artifact-confidence {
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.artifact-brief {
+  margin: 0;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.artifact-callout {
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #eff6ff, #f8fafc);
+  border: 1px solid #dbeafe;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.artifact-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.artifact-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #334155;
+  display: grid;
+  gap: 8px;
+  line-height: 1.55;
+}
+
+.artifact-list--watch li::marker {
+  color: #f59e0b;
+}
+
+.artifact-footer {
+  margin: 0;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.comparison-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+  vertical-align: top;
+}
+
+.comparison-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.severity-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.severity-pill--high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.severity-pill--medium {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.severity-pill--low {
+  background: #dcfce7;
+  color: #047857;
+}
+
+.artifact-block {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
+
+.artifact-block p {
+  margin: 0;
+  color: #334155;
+}
+
+.artifact-block--soft {
+  background: #f8fafc;
+}
+
+.guide-list,
+.risk-list,
+.plan-list {
+  display: grid;
+  gap: 10px;
+}
+
+.guide-card,
+.risk-card,
+.plan-item {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
+
+.guide-card__theme {
+  margin: 0 0 8px;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.guide-card p,
+.risk-card p,
+.plan-item p {
+  margin: 8px 0 0;
+  color: #334155;
+  line-height: 1.55;
+}
+
+.email-meta {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.email-meta p {
+  margin: 0;
+}
+
+.email-meta p + p {
+  margin-top: 8px;
+}
+
+.email-body {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
+
+.email-body p {
+  margin: 0;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.email-body p + p {
+  margin-top: 10px;
+}
+
+.risk-card__top,
+.plan-item__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.plan-item__head span {
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
 .copilot-response-card {
   padding: 12px;
   border-radius: 14px;
@@ -1515,6 +1748,12 @@ textarea:focus-visible {
 .copilot-confidence strong {
   color: #111827;
   font-size: 1.05rem;
+}
+
+@media (max-width: 1080px) {
+  .artifact-columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 .interviews-shell,

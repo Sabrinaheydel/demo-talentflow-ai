@@ -538,41 +538,35 @@ They should be framed clearly as intentional demo architecture choices, and the 
 
 # 14. Implementation Status
 
-## Interaction & Product Behavior sprint
+## Copilot Product Polish sprint
 
 Status:
-- Implemented core demo-safe interactions across the main recruiting workflow
+- Implemented deterministic Copilot decision-support outputs with action-specific artifacts
 
 Files modified:
-- src/app/layout.tsx
-- src/lib/demoExperience.tsx
-- src/app/page.tsx
-- src/app/candidate-profile/page.tsx
-- src/components/recruitment/InterviewsPage.tsx
-- src/components/recruitment/TeamPage.tsx
 - src/components/copilot/CopilotWorkspace.tsx
 - src/app/globals.css
-- src/lib/demoData.ts
 
-Interactions completed:
-- Added a shared demo-experience state layer so actions now affect multiple screens coherently
-- Enabled schedule, prepare, feedback-request and completion actions to update the recruiting story immediately
-- Wired candidate-profile actions to reflect interview preparation, feedback requests and completion state
-- Made the Interviews workspace update its visible state and feed the shared demo narrative
-- Made the Team module react to assignment, preparation and feedback actions with visible demo feedback
-- Added visible story-state indicators on Dashboard and Candidate Profile so the demo flow feels active and deterministic
-- Kept the experience demo-safe by avoiding any real backend or external system calls
+Implementation completed:
+- Replaced repetitive generic Copilot responses with six distinct deterministic capabilities:
+   - Executive Summary → executive briefing output
+   - Compare Candidates → comparison matrix output
+   - Interview Guide → structured interview guide output
+   - Suggested Email → recruiter-ready email draft output
+   - Hiring Risk Assessment → severity-based risk report output
+   - Next Best Action → owner/deadline/outcome decision plan output
+- Introduced a structured Copilot response contract per capability while keeping DEMO_MODE behavior fully deterministic
+- Kept shared candidate model usage unchanged by deriving all Copilot context from the canonical demo-data source
+- Reduced chat-like verbosity by returning concise in-thread confirmations and rendering full recruiter artifacts in the decision panel
+- Added dedicated visual patterns per capability to create clear differences in hierarchy, components and reading flow
 
 Build status:
-- Production build validated successfully after the interaction sprint work
+- Production build validated successfully after Copilot Product Polish changes
 
-Remaining technical limitations:
-- The experience remains intentionally demo-only and uses simulated data
-- The shared demo-state layer is client-side only and is designed for portfolio demonstration rather than persistence or production workflows
-- Some interactions remain lightweight by design to keep the product understandable and deterministic
-
-Demo-only behavior:
-- All primary recruiting interactions now produce visible feedback, local state updates and coherent cross-screen changes without real integrations
+Demo-mode constraints preserved:
+- No real LLM integration implemented
+- No architecture change introduced
+- No product strategy or QA sections modified
 
 ---
 
