@@ -25,7 +25,7 @@ export function ExecutiveBriefing({
   onPrimaryAction,
 }: ExecutiveBriefingProps) {
   return (
-    <section className="briefing-hero">
+    <section className="briefing-hero" data-guided-target="executive-briefing">
       <div className="briefing-hero__header">
         <div>
           <p className="eyebrow">{language === "en" ? "Executive briefing" : "Briefing executif"}</p>

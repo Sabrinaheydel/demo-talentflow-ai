@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge } from "../ui/Badge";
 import { Icon } from "../ui/Icon";
 import { canonicalCandidates, getCanonicalCandidateById } from "../../lib/demoData";
+import { useDemoExperience } from "../../lib/demoExperience";
 
 type Language = "en" | "fr";
 
@@ -496,6 +497,7 @@ function getResponseHint(intent: IntentKey, language: Language) {
 }
 
 export function CopilotWorkspace({ language, initialContext }: { language: Language; initialContext?: { candidateId?: string; mode?: string; context?: string } }) {
+  const { state } = useDemoExperience();
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(language));
   const [draft, setDraft] = useState(() => {
     if (initialContext?.mode === "interview-prep" && initialContext?.candidateId === "maya-chen") {
@@ -569,6 +571,9 @@ export function CopilotWorkspace({ language, initialContext }: { language: Langu
         tone: "Tone",
         to: "To",
         subject: "Subject",
+        executionTitle: "Latest shared execution",
+        executionEmpty: "No action executed yet.",
+        recentHistory: "Recent history",
       }
     : {
         title: "Copilot IA de recrutement",
@@ -600,6 +605,9 @@ export function CopilotWorkspace({ language, initialContext }: { language: Langu
         tone: "Ton",
         to: "À",
         subject: "Objet",
+        executionTitle: "Derniere execution partagee",
+        executionEmpty: "Aucune action executee pour le moment.",
+        recentHistory: "Historique recent",
       };
 
   const responseIntent = useMemo(() => latestResponse?.intent ?? null, [latestResponse?.intent]);
@@ -821,7 +829,7 @@ export function CopilotWorkspace({ language, initialContext }: { language: Langu
   };
 
   return (
-    <div className="copilot-shell">
+    <div className="copilot-shell" data-guided-target="copilot-workspace">
       <section className="copilot-chat-panel">
         <div className="copilot-panel__header">
           <div>
@@ -980,6 +988,32 @@ export function CopilotWorkspace({ language, initialContext }: { language: Langu
               ))}
             </ul>
           </div>
+        </section>
+
+        <section className="section-card copilot-side-card">
+          <div className="section-card__header">
+            <h3>{copy.executionTitle}</h3>
+            <p>{copy.recentHistory}</p>
+          </div>
+          {state.actionExecution.lastExecutionSummary ? (
+            <div className="copilot-empty-output">
+              <strong>{state.actionExecution.lastExecutionSummary.action}</strong>
+              <p>{state.actionExecution.lastExecutionSummary.target}</p>
+              <p>{state.actionExecution.lastExecutionSummary.timestamp}</p>
+              <p><strong>{language === "en" ? "Next action" : "Prochaine action"}:</strong> {state.actionExecution.lastExecutionSummary.nextAction}</p>
+            </div>
+          ) : (
+            <div className="copilot-empty-output">
+              <p>{copy.executionEmpty}</p>
+            </div>
+          )}
+          {state.actionExecution.actionHistory.length > 0 ? (
+            <ul className="artifact-list" aria-label={copy.recentHistory}>
+              {state.actionExecution.actionHistory.slice(-3).reverse().map((entry) => (
+                <li key={entry.id}>{entry.timestamp} - {entry.action}</li>
+              ))}
+            </ul>
+          ) : null}
         </section>
 
         <section className="section-card copilot-side-card">

@@ -10,21 +10,33 @@ type PriorityActionsProps = {
 };
 
 export function PriorityActions({ language, actions }: PriorityActionsProps) {
-  const { addStoryStep } = useDemoExperience();
+  const { state, addStoryStep, openActionIntent } = useDemoExperience();
   const [toast, setToast] = useState<string | null>(null);
-  const [modal, setModal] = useState<{ title: string; description: string; confirmLabel: string; message: string } | null>(null);
+
+  const mayaSalaryDone = state.candidates["maya-chen"]?.salaryAligned;
+  const emmaFeedbackDone = state.candidates["emma-laurent"]?.feedbackRequested;
 
   return (
     <>
       <div className="priority-list">
         {actions.map((action, index) => (
-          <div key={action.id} className="priority-item priority-item--actionable">
+          <div
+            key={action.id}
+            className="priority-item priority-item--actionable"
+            data-guided-target={index === 0 ? "priority-1" : undefined}
+          >
             <div>
               <p className="priority-item__title">{action.title}</p>
               <p className="priority-item__meta">
                 {action.candidate} - {action.deadline}
               </p>
-              <p className="priority-item__impact">{action.impact}</p>
+              <p className="priority-item__impact">
+                {action.id === "action-maya-offer" && mayaSalaryDone
+                  ? (language === "en" ? "Salary aligned. Offer risk reduced." : "Salaire aligne. Risque offre reduit.")
+                  : action.id === "action-emma-feedback" && emmaFeedbackDone
+                    ? (language === "en" ? "Feedback request sent with deadline tracking." : "Demande de feedback envoyee avec suivi d'echeance.")
+                    : action.impact}
+              </p>
               <p className="priority-item__owner">
                 {language === "en" ? "Owner" : "Owner"}: {action.owner}
               </p>
@@ -39,44 +51,28 @@ export function PriorityActions({ language, actions }: PriorityActionsProps) {
             <button
               type="button"
               className={index === 0 ? "btn btn--primary" : "btn btn--secondary"}
-              onClick={() => setModal({
-                title: action.title,
-                description: language === "en"
-                  ? `Action target: ${action.candidate}. Expected impact: ${action.impact}`
-                  : `Cible de l'action : ${action.candidate}. Impact attendu : ${action.impact}`,
-                confirmLabel: language === "en" ? "Run action" : "Executer l'action",
-                message: action.confirmMessage,
-              })}
+              disabled={(action.id === "action-maya-offer" && mayaSalaryDone) || (action.id === "action-emma-feedback" && emmaFeedbackDone)}
+              onClick={() => {
+                if (action.id === "action-maya-offer") {
+                  openActionIntent({ actionId: "validate-maya-salary", language });
+                  return;
+                }
+                if (action.id === "action-emma-feedback") {
+                  openActionIntent({ actionId: "request-emma-feedback", language });
+                  return;
+                }
+
+                addStoryStep(action.confirmMessage);
+                setToast(action.confirmMessage);
+              }}
             >
-              {language === "en" ? "Run action" : "Executer"}
+              {(action.id === "action-maya-offer" && mayaSalaryDone) || (action.id === "action-emma-feedback" && emmaFeedbackDone)
+                ? (language === "en" ? "Completed" : "Termine")
+                : language === "en" ? "Run action" : "Executer"}
             </button>
             </div>
         ))}
         </div>
-      {modal ? (
-        <div className="modal-backdrop" role="dialog" aria-modal="true">
-          <div className="modal-card">
-            <h4>{modal.title}</h4>
-            <p>{modal.description}</p>
-            <div className="modal-actions">
-              <button type="button" className="btn btn--secondary" onClick={() => setModal(null)}>
-                {language === "en" ? "Cancel" : "Annuler"}
-              </button>
-              <button
-                type="button"
-                className="btn btn--primary"
-                onClick={() => {
-                  addStoryStep(modal.message);
-                  setToast(modal.message);
-                  setModal(null);
-                }}
-              >
-                {modal.confirmLabel}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
       {toast ? <div className="toast" role="status">{toast}</div> : null}
     </>
   );

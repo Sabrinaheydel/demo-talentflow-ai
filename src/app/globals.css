@@ -2441,6 +2441,53 @@ textarea:focus-visible {
   margin-top: 12px;
 }
 
+.action-surface {
+  max-height: min(86vh, 920px);
+  overflow: auto;
+}
+
+.action-surface-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.action-surface-block {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.action-surface-block h5 {
+  margin: 0 0 8px;
+  color: #111827;
+}
+
+.action-surface-block p {
+  margin: 6px 0 0;
+}
+
+.action-message-preview {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #dbeafe;
+  background: white;
+}
+
+.action-message-preview p {
+  margin: 0;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.action-message-preview p + p {
+  margin-top: 8px;
+}
+
 .file-chip {
   display: inline-flex;
   align-items: center;
@@ -2451,6 +2498,158 @@ textarea:focus-visible {
   color: #1d4ed8;
   font-size: 0.84rem;
   font-weight: 600;
+}
+
+.guided-demo-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+.guided-demo-entry-card,
+.guided-demo-final-card {
+  width: min(680px, 100%);
+  background: white;
+  border-radius: 22px;
+  border: 1px solid #dbeafe;
+  padding: 24px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+  animation: guided-soft-zoom 220ms ease-out;
+}
+
+.guided-demo-entry-card h2,
+.guided-demo-final-card h2 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.guided-demo-entry-card p,
+.guided-demo-final-card p {
+  color: #475569;
+  line-height: 1.65;
+}
+
+.guided-demo-duration {
+  margin-top: 6px;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.guided-demo-actions {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.guided-demo-narration {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 65;
+  width: min(460px, calc(100vw - 30px));
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #dbeafe;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 22px 52px rgba(15, 23, 42, 0.18);
+  animation: guided-soft-zoom 220ms ease-out;
+}
+
+.guided-demo-narration__label {
+  margin: 0;
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guided-demo-progress {
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e2e8f0;
+  margin-top: 10px;
+}
+
+.guided-demo-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  transition: width 320ms ease;
+}
+
+.guided-demo-lines {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.guided-demo-lines p {
+  margin: 0;
+  color: #334155;
+  line-height: 1.55;
+}
+
+.guided-demo-chain {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #dbeafe;
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  display: grid;
+  gap: 6px;
+}
+
+.guided-demo-chain-row {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.guided-demo-chain-arrow {
+  color: #2563eb;
+}
+
+.guided-demo-target--active {
+  position: relative;
+  z-index: 55;
+  transform: scale(1.005);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.26), 0 20px 44px rgba(37, 99, 235, 0.18);
+  animation: guided-highlight-pulse 2.1s ease-in-out infinite;
+}
+
+@keyframes guided-soft-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes guided-highlight-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.24), 0 20px 44px rgba(37, 99, 235, 0.16);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.3), 0 22px 50px rgba(37, 99, 235, 0.2);
+  }
 }
 
 @keyframes fade-in {
@@ -2579,5 +2778,22 @@ textarea:focus-visible {
   .feedback-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .action-surface-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guided-demo-entry-card,
+  .guided-demo-final-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .guided-demo-narration {
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
+    width: auto;
   }
 }

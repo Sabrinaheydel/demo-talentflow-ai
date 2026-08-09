@@ -78,7 +78,7 @@ const teamMembers: TeamMember[] = [
 
 export function TeamPage({ language }: { language: "en" | "fr" }) {
   const router = useRouter();
-  const { state, reassignCandidate, togglePrepared, requestFeedback } = useDemoExperience();
+  const { state, openActionIntent } = useDemoExperience();
   const [toast, setToast] = useState<string | null>(null);
   const [recruiterFilter, setRecruiterFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -142,9 +142,9 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
           workload: "Workload",
         },
         actions: {
-          assign: "Assignment flow simulated for the next handoff.",
+          assign: "Assignment flow opened with explicit before/after impact.",
           workload: "Workload view updated for the current team mix.",
-          feedback: "Feedback reminder sent to the selected recruiter.",
+          feedback: "Final feedback request flow opened with deterministic message preview.",
           interview: "Opened the interview workspace.",
           copilot: "Opened Copilot with a team context.",
         },
@@ -204,9 +204,9 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
           workload: "Charge",
         },
         actions: {
-          assign: "Le flux d’assignation est simulé pour la prochaine main courante.",
+          assign: "Le flux d'assignation est ouvert avec impact avant/apres explicite.",
           workload: "La vue de charge a été mise à jour pour le mix actuel de l’équipe.",
-          feedback: "Un rappel de feedback a été envoyé au recruteur sélectionné.",
+          feedback: "Le flux de demande de feedback final est ouvert avec apercu de message deterministe.",
           interview: "L’espace d’entretien a été ouvert.",
           copilot: "Le Copilot a été ouvert avec un contexte équipe.",
         },
@@ -262,16 +262,24 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
 
         <div className="team-actions">
           <button type="button" className="btn btn--primary" onClick={() => {
-            reassignCandidate("maya-chen", "David Klein");
-            setToast(copy.actions.assign);
+            openActionIntent({
+              actionId: "reassign-candidate",
+              language,
+              candidateId: "maya-chen",
+              owner: state.candidates["maya-chen"]?.assignedRecruiter ?? "Sarah Martin",
+              newOwner: "David Klein",
+            });
           }}>{copy.primaryAction}</button>
           <button type="button" className="btn btn--secondary" onClick={() => {
-            togglePrepared("maya-chen");
             setToast(copy.actions.workload);
           }}>{copy.secondaryAction}</button>
           <button type="button" className="btn btn--secondary" onClick={() => {
-            requestFeedback("maya-chen");
-            setToast(copy.actions.feedback);
+            openActionIntent({
+              actionId: "request-emma-feedback",
+              language,
+              owner: state.candidates["emma-laurent"]?.assignedRecruiter ?? "David Klein",
+              recipient: "David Klein",
+            });
           }}>{copy.tertiaryAction}</button>
           <button type="button" className="btn btn--ghost" onClick={() => router.push("/interviews")}>{copy.openInterview}</button>
           <button type="button" className="btn btn--ghost" onClick={() => router.push("/copilot?context=team&mode=team-review")}>{copy.askCopilot}</button>
@@ -401,8 +409,13 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
 
               <div className="team-card__actions">
                 <button type="button" className="btn btn--secondary" onClick={() => {
-                  reassignCandidate("maya-chen", member.name);
-                  setToast(`${member.name} • ${copy.actions.feedback}`);
+                  openActionIntent({
+                    actionId: "reassign-candidate",
+                    language,
+                    candidateId: "maya-chen",
+                    owner: state.candidates["maya-chen"]?.assignedRecruiter ?? "Sarah Martin",
+                    newOwner: member.name,
+                  });
                 }}>{copy.tertiaryAction}</button>
                 <button type="button" className="btn btn--ghost" onClick={() => router.push("/interviews")}>{copy.openInterview}</button>
               </div>

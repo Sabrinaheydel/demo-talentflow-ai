@@ -7,7 +7,7 @@ type InsightsPanelProps = {
 
 export function InsightsPanel({ language, insights }: InsightsPanelProps) {
   return (
-    <div className="insights-panel">
+    <div className="insights-panel" data-guided-target="ai-insights">
       {insights.map((item) => (
         <div key={item.id} className="recommendation-card">
           <div className="recommendation-card__top">

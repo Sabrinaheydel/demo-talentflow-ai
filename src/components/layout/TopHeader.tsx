@@ -15,7 +15,7 @@ export function TopHeader({
   onLanguageChange,
 }: TopHeaderProps) {
   const { setLanguage } = useLanguage();
-  const { resetDemo } = useDemoExperience();
+  const { state, resetDemo, replayGuidedDemo } = useDemoExperience();
   const [toast, setToast] = useState<string | null>(null);
   const [modal, setModal] = useState<{ title: string; description: string; confirmLabel: string; message: string } | null>(null);
   const copy = translations[language];
@@ -55,6 +55,15 @@ export function TopHeader({
             FR
           </button>
         </div>
+        <button
+          type="button"
+          className="btn btn--secondary"
+          onClick={replayGuidedDemo}
+        >
+          {state.guidedDemo.running
+            ? (language === "en" ? "Restart guided demo" : "Redemarrer la demo guidee")
+            : (language === "en" ? "Replay guided demo" : "Rejouer la demo guidee")}
+        </button>
         <button
           type="button"
           className="btn btn--secondary"

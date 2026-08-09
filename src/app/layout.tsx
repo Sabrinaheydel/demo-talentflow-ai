@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "../lib/i18n";
 import { DemoExperienceProvider } from "../lib/demoExperience";
+import { ActionExecutionSurface } from "../components/actions/ActionExecutionSurface";
+import { GuidedDemoOverlay } from "../components/demo/GuidedDemoOverlay";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -20,7 +22,11 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body>
         <LanguageProvider>
-          <DemoExperienceProvider>{children}</DemoExperienceProvider>
+          <DemoExperienceProvider>
+            {children}
+            <ActionExecutionSurface />
+            <GuidedDemoOverlay />
+          </DemoExperienceProvider>
         </LanguageProvider>
       </body>
     </html>

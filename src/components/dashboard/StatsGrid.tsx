@@ -10,7 +10,7 @@ const iconByIndex = ["users", "arrow", "briefcase", "calendar", "trend", "spark"
 
 export function StatsGrid({ language, kpis }: StatsGridProps) {
   return (
-    <div className="stats-grid">
+    <div className="stats-grid" data-guided-target="decision-kpis">
       {kpis.map((kpi, index) => (
         <div key={kpi.id} className="stat-card stat-card--hover stat-card--decision">
           <div className="stat-card__top">

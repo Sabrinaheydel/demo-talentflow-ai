@@ -290,6 +290,182 @@ Decision log (Dashboard positioning):
 - Reason: Recruiters returning after absence need situational awareness and immediate decision clarity, not static reporting.
 - Impact: Hero, KPIs, insight cards and action design now prioritize change detection, risk signaling and clear first action.
 
+## 5.2 Action Transparency & Execution Credibility Sprint
+
+Sprint goal:
+
+Before every meaningful action, show exactly what will happen. After execution, show exactly what changed.
+
+Product outcome expected:
+
+- increase user trust
+- improve demo realism
+- make AI-assisted actions predictable and auditable
+
+1. Current action-transparency problems
+
+- Many actions still use generic modal descriptions that do not clearly expose recipient, channel, exact message and side effects.
+- Toast confirmations are often generic and do not summarize state deltas or downstream product consequences.
+- Action behavior is inconsistent across Dashboard, Pipeline, Candidate Profile, Interviews, Team and Copilot.
+- Users can execute important actions without seeing precise before/after changes in TalentFlow state.
+
+2. User trust / business rationale
+
+- Recruiters and managers need confidence that actions are safe before execution.
+- Explicit preview reduces ambiguity and prevents accidental workflow mistakes.
+- Clear post-action evidence improves product credibility for portfolio demonstrations.
+- AI-assisted products require higher transparency standards than static SaaS dashboards.
+
+3. Reusable Action Preview framework
+
+Standard preview schema for meaningful actions:
+
+- Action name
+- Target candidate/person
+- Owner / responsible user
+- Recipient
+- Channel
+- Exact deterministic message/content
+- Status changes
+- Data changes
+- Expected downstream effects
+- Confirmation CTA
+
+Product principle:
+
+INTENT -> PREVIEW -> CONFIRMATION -> EXECUTION -> VISIBLE RESULT
+
+4. Reusable Action Result framework
+
+Post-execution result schema (non-generic):
+
+- Completed action name
+- Who was notified
+- What status changed
+- What shared product state changed
+- What dashboard/queue/KPI changed
+- Next recommended action (if applicable)
+
+Result pattern should appear in a structured completion panel or rich confirmation surface, not as a bare toast-only outcome.
+
+5. Actions requiring full confirmation
+
+- Validate salary alignment
+- Send offer / offer-related commitment actions
+- Request feedback (when recipient and deadline matter)
+- Reassign candidate ownership
+- Complete interview (when it advances decision state)
+- Send recruiter email to candidate or stakeholder
+- Apply Copilot recommendation that changes candidate stage, owner or decision state
+
+These actions can materially change priorities, ownership or candidate communication.
+
+6. Actions requiring lightweight confirmation
+
+- Schedule interview
+- Mark candidate as prepared
+- Prepare draft recruiter email (without send)
+- Open Copilot with contextual mode
+- Open interview workspace from team context
+
+These actions should show quick preview + one-step confirm, with minimal friction.
+
+7. Actions requiring no confirmation
+
+- Filter/sort/search changes
+- Pure navigation actions
+- Expanding cards/panels
+- Read-only view switches
+
+No confirmation unless irreversible state mutation is introduced.
+
+8. Message-preview strategy
+
+- Use deterministic templates per action type and language (EN/FR).
+- Always show exact outgoing text before send-type actions.
+- Include recipient, channel, tone and purpose.
+- For AI-assisted actions, include a short "why this message" rationale.
+
+9. State-change strategy
+
+Each meaningful action should expose deterministic before/after deltas for:
+
+- candidate stage
+- interview status
+- feedback status
+- ownership
+- risk flags
+- decision queue position
+- dashboard priority/KPI impact
+
+State delta should be visible in both preview and result patterns.
+
+10. Cross-screen consequences
+
+Action effects must remain coherent across:
+
+- Dashboard (priority, risks, KPIs, actions)
+- Pipeline (stage and urgency)
+- Candidate Profile (status, notes, interview progress)
+- Interviews (prepared/completed/feedback)
+- Team (ownership and workload)
+- Copilot (context and recommendation continuity)
+
+No action should update one surface while leaving contradictory state on another surface.
+
+11. MVP scope
+
+Must Have:
+
+- Shared preview schema for meaningful actions
+- Shared result schema for meaningful actions
+- Full-confirmation flows for high-impact actions
+- Lightweight confirmation flows for medium-impact actions
+- Deterministic message preview for communication actions
+- Explicit state-change summary after execution
+
+Should Have:
+
+- Action-history snippets linked to candidate context
+- Faster cross-linking from action result to next execution surface
+
+Could Have:
+
+- Explainability snippets for AI suggestion ranking
+- Batch preview for multi-action manager workflows
+
+12. Out of scope
+
+- Real outbound email delivery
+- External ATS side effects
+- Live messaging integrations
+- Non-deterministic AI agent execution
+- Full workflow redesign of all modules in one sprint
+
+13. Acceptance criteria
+
+- Users can state exactly what an action will do before confirming it.
+- Communication actions show recipient, channel and exact message preview.
+- High-impact actions require explicit confirmation with state-delta visibility.
+- Post-execution surface clearly shows what changed and what is next.
+- Action outcomes remain consistent across Dashboard, Pipeline, Profile, Interviews, Team and Copilot.
+- EN/FR action previews and results are complete and not mixed-language.
+
+14. Sprint Definition of Done
+
+- Meaningful actions follow one reusable transparency model across core screens.
+- Generic toast-only confirmations are replaced for high-impact actions.
+- Users no longer need to infer hidden side effects.
+- AI-assisted actions are understandable before execution and auditable after execution.
+- The demo feels credible as an operational recruiting system, not a click-through prototype.
+
+Decision log (Action transparency):
+
+- Previous decision: Action confirmation behavior varied by screen and often emphasized UI feedback over execution clarity.
+- New decision: Meaningful actions must use explicit preview and explicit result patterns with deterministic state-change visibility.
+- Reason: Trust and execution credibility depend on predictable behavior before confirmation and observable impact after execution.
+- Impact: Action design standards now prioritize transparency, consistency and cross-screen state coherence.
+
 ---
 
 # 6. Product Principles
@@ -910,6 +1086,232 @@ Decision log (Dashboard architecture):
 - Reason: Returning and cover users need immediate operational comprehension and one explicit first decision.
 - Impact: Shared model, demo state, reset behavior and localization now include briefing intelligence artifacts.
 
+## 9.16 Action Transparency & Execution Engine Architecture
+
+This section translates Sprint 8 into one reusable implementation architecture shared across Dashboard, Pipeline, Candidate Profile, Interviews, Team and Copilot.
+
+Execution lifecycle (mandatory):
+
+Intent
+-> Preview
+-> Confirmation
+-> Execution
+-> Result
+-> Recommended next action
+
+### 1. Shared data contracts
+
+Core reusable contracts:
+
+- ActionDefinition
+- ActionPreview
+- ActionMessage
+- ActionEffect
+- ActionStateTransition
+- ActionResult
+- ActionHistoryEntry
+- ExecutionSummary
+
+ActionDefinition minimum fields:
+
+- id
+- title
+- description
+- candidate
+- owner
+- recipient
+- channel
+- riskLevel
+- confirmationLevel
+- messagePreview
+- beforeState
+- afterState
+- affectedScreens
+- kpiChanges
+- priorityChanges
+- historyEntry
+- recommendedNextAction
+
+Suggested enums:
+
+- riskLevel: low | medium | high
+- confirmationLevel: none | lightweight | full
+- channel: inApp | email | copilot | workflow
+- executionStatus: idle | previewed | confirmed | executing | completed | failed
+
+### 2. Component responsibilities
+
+- ActionExecutionEngine: orchestration layer that validates definition, computes preview, applies transition and emits result.
+- ActionPreview: deterministic pre-confirmation surface showing intent, recipient, message and expected state deltas.
+- ActionResult: deterministic post-execution surface showing completed work, state changes and next step.
+- ExecutionSummary: compact cross-screen summary card for recent completed actions.
+- ActionHistoryPanel (or equivalent list): timeline of ActionHistoryEntry items for auditability.
+
+No screen-specific duplicate confirmation logic for meaningful actions.
+
+### 3. State management
+
+Add one shared action-execution slice in existing demo state (single source):
+
+- activeActionId
+- activePreview
+- pendingConfirmation
+- executionQueue
+- lastExecutionResult
+- actionHistory
+
+This slice must be used by all core surfaces; page-local action state should only control local presentation, not canonical execution truth.
+
+### 4. Deterministic execution flow
+
+Deterministic flow contract:
+
+1. Resolve ActionDefinition by id and context.
+2. Build ActionPreview from definition + current shared state.
+3. Require confirmation based on confirmationLevel.
+4. Apply ActionStateTransition rules to shared state.
+5. Produce ActionResult + ActionHistoryEntry.
+6. Publish ExecutionSummary and recommended next action.
+
+No random behavior, no hidden side effects, no external dependency in demo mode.
+
+### 5. Cross-screen synchronization
+
+Execution effects must publish synchronized deltas to all affected screens listed in affectedScreens.
+
+Synchronization rules:
+
+- one execution source of truth
+- one transition contract per action
+- no page-local override of post-action canonical values
+- all views read updated shared state after execution
+
+### 6. History strategy
+
+ActionHistoryEntry should capture:
+
+- actionId
+- timestamp (deterministic demo clock)
+- actor
+- recipient
+- message snapshot
+- before/after compact diff
+- affectedScreens
+- outcome status
+
+History is append-only within session and resettable via Reset Demo.
+
+### 7. Preview strategy
+
+ActionPreview must always include, where relevant:
+
+- action name
+- target
+- owner
+- recipient
+- channel
+- exact deterministic message
+- status/data deltas
+- downstream effects
+- confirmation CTA
+
+Preview variants:
+
+- full preview card for high-impact actions
+- inline lightweight preview for medium-impact actions
+- no preview modal for non-mutating actions
+
+### 8. Execution strategy
+
+Execution is transition-driven, not UI-driven.
+
+- UI triggers engine intent only.
+- Engine applies transition rules and returns result payload.
+- UI renders returned ActionResult.
+
+Failures (demo-safe) should return deterministic error results with no partial state mutation.
+
+### 9. Result strategy
+
+ActionResult must explicitly show:
+
+- what completed
+- who was notified
+- what changed in state
+- what changed in KPIs/priorities
+- next recommended action
+
+Generic toast-only completion is insufficient for meaningful actions.
+
+### 10. Extensibility rules
+
+- New actions are configuration-first: add ActionDefinition + transition mapping + localized message templates.
+- No new bespoke modal/result flow per screen.
+- Backward compatibility: existing actions can migrate progressively behind same engine.
+- Keep contracts minimal; avoid introducing action-specific ad hoc fields when generic fields already cover the need.
+
+### 11. Future AI integration
+
+Current mode stays deterministic and local.
+
+Future integration path:
+
+- AI can suggest ActionDefinition candidates and message drafts.
+- Execution still passes through same confirmation and transition contracts.
+- AI never bypasses confirmationLevel and state-transition guardrails.
+
+### 12. Localization strategy
+
+Localize centrally by action template keys:
+
+- titles/descriptions
+- preview labels
+- messagePreview templates
+- result summaries
+- recommended next action text
+
+Prevent mixed EN/FR by resolving all action copy from one localization layer before rendering preview/result.
+
+### 13. Accessibility considerations
+
+- Preview and result surfaces must be keyboard reachable and screen-reader structured.
+- Confirmation dialogs must include focus management, escape handling and explicit action verbs.
+- Status-delta sections must be semantically grouped (headings/lists) for assistive interpretation.
+- Do not rely on color-only risk encoding; include text labels.
+
+### 14. Architecture risks
+
+- Contract drift if screens bypass engine with local action shortcuts.
+- Localization regressions if messagePreview text is hard-coded outside translation system.
+- Sync inconsistency if affectedScreens mapping is incomplete.
+- Over-friction risk if confirmationLevel is set too high for low-impact actions.
+- History bloat if entries are too verbose and not normalized.
+
+### 15. Architecture acceptance criteria
+
+- One shared ActionExecutionEngine handles meaningful actions across all six core surfaces.
+- Every high-impact action renders deterministic preview and deterministic result.
+- State transitions are applied through shared contracts, not duplicated screen logic.
+- Cross-screen deltas remain coherent after each execution.
+- Action history captures auditable before/after evidence.
+- EN/FR preview/result output is complete and consistent.
+
+### 16. Architecture Definition of Done (Sprint 8)
+
+- Shared contracts are defined and integrated into the technical context.
+- Lifecycle Intent->Preview->Confirmation->Execution->Result->Recommended next action is enforceable by design.
+- ConfirmationLevel policy is mapped for full/lightweight/none actions.
+- Result pattern replaces generic completion behavior for meaningful actions.
+- Reset Demo resets action-execution state and history to deterministic baseline.
+- Architecture is ready for phased implementation without redesigning screen-level action flows.
+
+Decision log (Action execution architecture):
+
+- Previous decision: Action confirmation and post-action behavior were implemented per screen with inconsistent state semantics.
+- New decision: Adopt one shared Action Execution System with reusable contracts, transitions and result surfaces.
+- Reason: Predictability, trust and execution credibility require a single deterministic action lifecycle across the product.
+- Impact: Future action features are built by configuration and transition contracts rather than duplicated modal/toast logic.
+
 ---
 
 # 10. Demo Mode
@@ -970,18 +1372,20 @@ Avoid:
 
 # 12. Current Roadmap
 
-1. Deliver Dashboard Product Intelligence sprint (Executive Briefing + since-last-visit logic + priority-first actions)
-2. Validate returning-user and temporary-cover catch-up flow end to end
-3. Finalize core cross-page data consistency across dashboard, pipeline, profile, interviews, team and Copilot
-4. Strengthen interview and team workflow clarity
-5. Complete FR/EN localization and remove mixed or incomplete text
-6. Improve buttons, states, transitions and CTA clarity
-7. Make Copilot outputs more recruiter-ready and action-oriented
-8. Add onboarding, Guided Demo and Reset Demo experiences
-9. Run desktop, tablet and mobile QA for the full public demo flow
-10. Prepare public deployment and demo script
-11. Add simulation/API switch architecture for future live AI compatibility
-12. Optionally introduce a live AI API in a later phase
+1. Deliver Action Transparency & Execution Credibility sprint (intent -> preview -> confirmation -> result)
+2. Validate high-impact action preview/result flows across Dashboard, Pipeline, Profile, Interviews, Team and Copilot
+3. Deliver Dashboard Product Intelligence sprint (Executive Briefing + since-last-visit logic + priority-first actions)
+4. Validate returning-user and temporary-cover catch-up flow end to end
+5. Finalize core cross-page data consistency across dashboard, pipeline, profile, interviews, team and Copilot
+6. Strengthen interview and team workflow clarity
+7. Complete FR/EN localization and remove mixed or incomplete text
+8. Improve buttons, states, transitions and CTA clarity
+9. Make Copilot outputs more recruiter-ready and action-oriented
+10. Add onboarding, Guided Demo and Reset Demo experiences
+11. Run desktop, tablet and mobile QA for the full public demo flow
+12. Prepare public deployment and demo script
+13. Add simulation/API switch architecture for future live AI compatibility
+14. Optionally introduce a live AI API in a later phase
 
 ---
 
@@ -1002,6 +1406,59 @@ They should be framed clearly as intentional demo architecture choices, and the 
 ---
 
 # 14. Implementation Status
+
+## Guided Demo Experience sprint (Sprint 9)
+
+Status:
+- Implemented deterministic guided Product Builder walkthrough with shared demo-state orchestration
+
+Files created:
+- src/components/demo/GuidedDemoOverlay.tsx
+
+Files modified:
+- src/app/layout.tsx
+- src/app/globals.css
+- src/lib/demoExperience.tsx
+- src/components/layout/TopHeader.tsx
+- src/components/dashboard/ExecutiveBriefing.tsx
+- src/components/dashboard/StatsGrid.tsx
+- src/components/recruitment/InsightsPanel.tsx
+- src/components/recruitment/PriorityActions.tsx
+- src/components/actions/ActionExecutionSurface.tsx
+- src/app/candidate-profile/page.tsx
+- src/components/copilot/CopilotWorkspace.tsx
+
+Implementation completed:
+- Added a deterministic 7-scene guided walkthrough driven by shared demo state only (no backend and no API-dependent timers)
+- Added opening dialog with:
+   - Welcome to TalentFlow title
+   - Product Builder demonstration subtitle
+   - 90-second duration label
+   - Start Guided Demo and Skip controls
+- Implemented reusable guided-demo controls in shared state:
+   - startGuidedDemo
+   - skipGuidedDemo
+   - replayGuidedDemo
+   - finishGuidedDemo
+   - markGuidedDemoActionPreviewOpened
+- Implemented smooth scene progression across:
+   - Executive Briefing highlight
+   - Decision KPI highlight
+   - AI Insights highlight
+   - Priority #1 highlight + automatic Action Preview opening
+   - Automatic Candidate Profile navigation
+   - Automatic Copilot navigation
+   - Final Product Operating System screen with end-to-end chain
+- Added skippable-anytime behavior during opening, narration and final screen
+- Added replay flow through top-header control for reusable product demo sessions
+- Added soft zoom and gentle highlight system with responsive behavior for desktop and mobile
+- Preserved deterministic, demo-safe operation by keeping all orchestration local and state-based
+
+Localization coverage:
+- Guided experience copy and controls implemented in EN/FR
+
+Build status:
+- Production build validated successfully after Sprint 9 guided demo implementation
 
 ## Dashboard Executive Briefing sprint
 
@@ -1099,6 +1556,112 @@ Demo-mode constraints preserved:
 - No real LLM integration implemented
 - No architecture change introduced
 - No product strategy or QA sections modified
+
+## Action Transparency & Execution Engine sprint (Sprint 8)
+
+Status:
+- Implemented reusable shared Action Execution System reference implementation
+
+Files created:
+- src/lib/actionExecution.ts
+- src/components/actions/ActionExecutionSurface.tsx
+
+Files modified:
+- src/app/layout.tsx
+- src/app/globals.css
+- src/lib/demoExperience.tsx
+- src/components/recruitment/PriorityActions.tsx
+- src/components/recruitment/TeamPage.tsx
+- src/components/recruitment/InterviewsPage.tsx
+- src/components/recruitment/PipelineBoard.tsx
+- src/app/candidate-profile/page.tsx
+- src/components/copilot/CopilotWorkspace.tsx
+
+Implementation completed:
+- Added shared action contracts and deterministic engine primitives:
+   - ActionDefinition
+   - ActionEffect
+   - ActionMessage
+   - ActionStateTransition
+   - ActionHistoryEntry
+   - ExecutionSummary
+   - ActionPreview
+   - ActionResult
+   - ActionExecutionState
+- Added one reusable global Action Preview / Result surface mounted at app root:
+   - no per-screen duplicate action modal logic for migrated meaningful actions
+   - keyboard-accessible dialog semantics with Escape support and focused close action
+- Added shared action-execution state slice in demo store:
+   - actionExecution.activeActionId
+   - actionExecution.activeDefinition
+   - actionExecution.activePreview
+   - actionExecution.pendingConfirmation
+   - actionExecution.executionQueue
+   - actionExecution.lastExecutionResult
+   - actionExecution.actionHistory
+   - actionExecution.lastExecutionSummary
+- Added reusable orchestration methods in shared state:
+   - openActionIntent
+   - confirmActionExecution
+   - dismissActionSurface
+
+Reference actions migrated (4):
+- Validate Maya salary alignment (full confirmation)
+- Request Emma final feedback (full confirmation)
+- Reassign candidate (full confirmation)
+- Mark candidate as prepared (lightweight confirmation)
+
+Message preview implementation:
+- Deterministic EN/FR templates centralized in actionExecution layer
+- Communication actions include sender, recipient, channel, subject (where relevant) and full body preview
+- No real outbound email/integration call performed
+
+Cross-screen synchronization implemented:
+- Salary alignment updates reflected through shared state and visible in:
+   - Dashboard action status
+   - Pipeline candidate status row
+   - Candidate Profile salary alignment status
+- Feedback request updates reflected through shared state and visible in:
+   - Dashboard action status
+   - Interviews feedback/requested state
+   - Team-triggered action flow and shared execution summary
+- Reassignment updates reflected through shared state and visible in:
+   - Team actions
+   - Pipeline recruiter ownership display
+   - Candidate Profile owner metadata
+- Prepared updates reflected through shared state and visible in:
+   - Interviews candidate readiness
+   - Candidate Profile prepared status control
+   - Pipeline prep indicator
+
+Action history status:
+- Lightweight append-only demo history implemented in shared state
+- Each execution records: action, target, owner, timestamp, before, after, result
+- Copilot side panel displays latest shared execution summary and recent history entries
+
+Reset behavior:
+- Reset Demo now clears and restores deterministic baseline for:
+   - action execution state
+   - action history
+   - preview/result state
+   - temporary candidate status updates and ownership changes
+   - dashboard priority state tied to executed actions
+
+Build status:
+- npm run build: PASS
+- Non-blocking warning remains in ESLint config format (pre-existing)
+
+Current known limitations:
+- Only four reference actions are migrated to the shared engine in this sprint step
+- Some existing non-reference actions still use legacy local confirmation/toast behavior
+- Team and Pipeline aggregates remain partly demo-static outside migrated action impacts
+- Action execution is deterministic demo mode only (no real integrations)
+
+Remaining actions not yet migrated:
+- Offer-send related actions
+- Interview completion actions impacting final decision state
+- Recruiter email simulation actions outside the two migrated communication references
+- Copilot recommendation actions that mutate stage/owner/decision state
 
 ---
 
@@ -1477,6 +2040,209 @@ READY WITH MINOR FIXES
 ## Single most important improvement before moving on
 
 Finalize full FR localization and remove mixed-language "owner" phrasing across all new Dashboard briefing blocks.
+
+---
+
+# 15.3 QA Review — Sprint 8 Action Transparency & Execution Engine
+
+## 1. Executive QA summary
+
+The Sprint 8 reference implementation introduces a credible shared Action Execution Engine with one reusable preview/result surface and deterministic state transitions. The four reference actions are integrated and technically stable, and build validation passes. However, the sprint goal is only partially achieved because action transparency is inconsistent at some entry points, FR localization remains incomplete in key labels, and workload/result credibility is still partly static for reassignment scenarios.
+
+Persona verdict:
+
+- Recruiter: Stronger trust vs previous generic toasts, especially for salary and feedback actions.
+- Recruiting manager: Flow is understandable, but reassignment business impact is not fully reflected in team workload data.
+- Product manager: Good architecture reuse and deterministic behavior; migration coverage still incomplete.
+- UX reviewer: Reusable modal is clear, but lightweight confirmation feels too heavy and copy consistency in FR is uneven.
+- QA tester: Core flow works (Intent -> Preview -> Confirmation -> Execution -> Result), history appends, reset clears state.
+- Product Builder recruiter evaluator: Solid product-builder signal, but needs one more polish pass before broad migration.
+
+## 2. Critical issues
+
+- None.
+
+## 3. High issues
+
+### 1. HIGH — Request-feedback reference flow can still bypass shared engine in Interviews
+- Problem: The Interviews page still has a direct request-feedback action path that bypasses the shared preview/result engine.
+- Why it matters: This breaks strict action-transparency consistency for a meaningful action and weakens trust.
+- Evidence locations:
+   - src/components/recruitment/InterviewsPage.tsx
+   - src/lib/demoExperience.tsx
+- Severity: HIGH
+
+### 2. HIGH — Reassignment impact is not reflected in Team workload indicators
+- Problem: Reassign action updates candidate owner, but Team workload cards are still static data and do not visibly change after execution.
+- Why it matters: Users cannot fully explain operational impact after confirmation, reducing execution credibility.
+- Evidence locations:
+   - src/components/recruitment/TeamPage.tsx
+- Severity: HIGH
+
+### 3. HIGH — FR localization is incomplete in shared action surfaces and dashboard action labels
+- Problem: Several FR labels remain English or raw enum-like values (for example Owner, confirmation level text), creating mixed-language UX.
+- Why it matters: Sprint requires coherent EN/FR action transparency with no mixed-language artifacts.
+- Evidence locations:
+   - src/components/recruitment/PriorityActions.tsx
+   - src/components/actions/ActionExecutionSurface.tsx
+- Severity: HIGH
+
+## 4. Medium issues
+
+### 4. MEDIUM — Action Preview does not explicitly render expected-impact block
+- Problem: expectedImpact is produced by engine contracts but not shown in the reusable preview surface.
+- Why it matters: Users should clearly understand business consequences before confirming.
+- Evidence locations:
+   - src/lib/actionExecution.ts
+   - src/components/actions/ActionExecutionSurface.tsx
+- Severity: MEDIUM
+
+### 5. MEDIUM — Lightweight confirmation is visually as heavy as full confirmation
+- Problem: Mark-candidate-prepared uses the same heavy preview surface density as full-risk actions.
+- Why it matters: Confirmation policy is technically correct but UX friction is higher than intended for lightweight actions.
+- Evidence locations:
+   - src/lib/actionExecution.ts
+   - src/components/actions/ActionExecutionSurface.tsx
+- Severity: MEDIUM
+
+### 6. MEDIUM — Accessibility focus trap is not complete
+- Problem: Dialog focus is initially managed and Escape works, but no strict tab focus trap is enforced.
+- Why it matters: Keyboard users can potentially move focus outside modal content while it is open.
+- Evidence locations:
+   - src/components/actions/ActionExecutionSurface.tsx
+- Severity: MEDIUM
+
+## 5. Nice-to-have improvements
+
+- Localize confirmation-level labels into user-friendly EN/FR wording (instead of raw full/lightweight values).
+- Add a compact inline preview variant for lightweight actions.
+- Add a tiny in-context history snippet near action triggers on Dashboard and Team (not only Copilot side panel).
+- Add explicit per-action deadline label in Preview metadata block for faster manager scanning.
+
+## Shared engine verification
+
+- One reusable preview surface: PASS.
+- One reusable result surface: PASS.
+- Shared execution state: PASS.
+- No duplicated modal logic for migrated actions: PASS (for the four migrated paths), PARTIAL globally (legacy paths still exist outside migrated scope).
+- Clear lifecycle Intent -> Preview -> Confirmation -> Execution -> Result: PASS.
+- Reset Demo clears execution state: PASS.
+- Action history append: PASS.
+- EN/FR coherence: PARTIAL.
+
+## Action-by-action verification
+
+### A. Validate Maya salary alignment
+
+Before confirmation:
+- target/owner/recipient/channel/message: PASS.
+- current and resulting state visibility: PASS.
+- affected screens + KPI/priority impact: PASS.
+
+After confirmation:
+- salary status changes visibly: PASS.
+- offer-risk change visibility: PASS.
+- Priority #1 update behavior: PARTIAL (state updates, but UX salience could be clearer).
+- Dashboard/Pipeline/Profile coherence: PASS.
+- result explanation clarity: PASS.
+
+### B. Request Emma final feedback
+
+Before confirmation:
+- recipient/deadline/message/status change/affected screens: PASS in shared flow.
+
+After confirmation:
+- feedback request visibility: PASS.
+- Interviews/Team/Dashboard coherence: PARTIAL due to alternate legacy trigger path in Interviews.
+- result explanation clarity: PASS.
+
+### C. Reassign candidate
+
+Before confirmation:
+- current owner/new owner/workload effect/affected screens: PASS.
+
+After confirmation:
+- Team ownership change: PASS.
+- Pipeline/Profile coherence: PASS.
+- workload indicators reflect change: FAIL (currently static team workload data).
+
+### D. Mark candidate as prepared
+
+- Lightweight confirmation appropriateness: PARTIAL (flow works but UI is heavier than policy intent).
+- prepared state visibility: PASS.
+- Interviews reflection: PASS.
+- related Dashboard coherence: PASS.
+
+## Action transparency verdict
+
+- Can users explain exactly what will happen before confirm? MOSTLY YES.
+- Can users explain exactly what changed after execution? PARTIALLY YES.
+- Gap source: reassignment workload credibility and legacy bypass path for feedback action.
+
+## Accessibility verification
+
+- keyboard navigation: PASS.
+- Escape behavior: PASS.
+- focus management (initial focus): PASS.
+- dialog semantics: PASS.
+- visible focus: PASS.
+- readable before/after states: PASS.
+- full focus trap: PARTIAL.
+
+## Localization verification
+
+- titles/labels/message previews/result summaries/CTAs/state changes: PARTIAL.
+- Main gaps: mixed FR/EN labels and raw confirmation-level wording.
+
+## Demo credibility verdict
+
+The experience now feels closer to a real operational workflow than a popup demo for salary/feedback/prepared actions. Reassignment still feels partially simulated because workload consequences are not materially reflected in Team metrics.
+
+## Portfolio evaluation (1-10)
+
+- Product Thinking: 8.8/10
+- Business Understanding: 8.7/10
+- UX reasoning: 8.2/10
+- Action transparency: 8.1/10
+- Execution credibility: 7.8/10
+- AI product credibility: 8.0/10
+- Technical structure: 8.6/10
+- Demo quality: 8.2/10
+- Portfolio impact: 8.5/10
+
+Would this Action Execution Engine strengthen Sabrina's Product Builder application?
+
+Yes. It demonstrates strong reusable product architecture and deterministic operational thinking. A final polish pass on transparency consistency and localization would significantly increase interview impact.
+
+## Sprint review
+
+Sprint Goal achieved:
+PARTIALLY
+
+Business value delivered:
+The product now provides a reusable, deterministic action execution foundation that materially improves trust and explainability for high-impact recruiting actions.
+
+Main learning:
+Reusable engine architecture increases quality quickly, but credibility depends on complete migration discipline and visible downstream state effects.
+
+Recommendation:
+Complete transparency parity at all entry points for meaningful actions, localize all action labels/states in FR, and make reassignment effects visible in team workload metrics before broad migration.
+
+## 6. Demo-readiness score /10
+
+8.2/10
+
+## 7. Release recommendation
+
+READY WITH MINOR FIXES
+
+## 8. Is the four-action reference strong enough for wider migration?
+
+Yes, with guardrails. The architecture is strong enough to migrate remaining high-impact actions once the three high issues above are addressed.
+
+## 9. Single most important improvement before wider migration
+
+Enforce strict no-bypass policy for meaningful actions so every trigger path uses the shared engine preview/result lifecycle.
 
 All agents must use this file as shared project context.
 

@@ -98,7 +98,7 @@ type PipelineBoardProps = {
 };
 
 export function PipelineBoard({ language }: PipelineBoardProps) {
-  const { addStoryStep } = useDemoExperience();
+  const { state, addStoryStep } = useDemoExperience();
   const [search, setSearch] = useState("");
   const [jobFilter, setJobFilter] = useState("all");
   const [recruiterFilter, setRecruiterFilter] = useState("all");
@@ -342,6 +342,17 @@ export function PipelineBoard({ language }: PipelineBoardProps) {
                     items.map((candidate) => {
                       const badgeTone = candidate.priority === "Urgent" ? "danger" : candidate.priority === "Medium" ? "warning" : "neutral";
                       const priorityLabel = copy.badgeLabels[candidate.priority.toLowerCase() as "urgent" | "medium" | "watch"];
+                      const candidateId = candidate.name.toLowerCase().replace(/\s+/g, "-");
+                      const candidateState = state.candidates[candidateId];
+                      const recruiterName = candidateState?.assignedRecruiter ?? candidate.recruiter;
+                      const salaryAlignmentStatus = candidateId === "maya-chen"
+                        ? candidateState?.salaryAligned
+                          ? (language === "en" ? "Salary alignment complete" : "Alignement salarial termine")
+                          : (language === "en" ? "Salary alignment pending" : "Alignement salarial en attente")
+                        : null;
+                      const prepStatus = candidateState?.prepared
+                        ? (language === "en" ? "Interview prep complete" : "Preparation entretien terminee")
+                        : null;
 
                       return (
                         <Link
@@ -369,13 +380,20 @@ export function PipelineBoard({ language }: PipelineBoardProps) {
                           <div className="pipeline-card__footer">
                             <div>
                               <p>{language === "en" ? "Recruiter" : "Recruteur"}</p>
-                              <strong>{candidate.recruiter}</strong>
+                              <strong>{recruiterName}</strong>
                             </div>
                             <div>
                               <p>{language === "en" ? "Last activity" : "Dernière activité"}</p>
                               <strong>{candidate.activity}</strong>
                             </div>
                           </div>
+
+                          {salaryAlignmentStatus || prepStatus ? (
+                            <div className="pipeline-card__priority">
+                              <span className="pipeline-card__dot pipeline-card__dot--medium" />
+                              <span>{salaryAlignmentStatus ?? prepStatus}</span>
+                            </div>
+                          ) : null}
 
                           <div className="pipeline-card__priority">
                             <span className={`pipeline-card__dot pipeline-card__dot--${candidate.priority.toLowerCase()}`} />

@@ -83,7 +83,7 @@ const activity = [
 export default function CandidateProfilePage() {
   const mayaCandidate = getCanonicalCandidateById("maya-chen");
   const [language, setLanguage] = useState<"en" | "fr">("en");
-  const { state, togglePrepared, requestFeedback, scheduleInterview, completeInterview } = useDemoExperience();
+  const { state, openActionIntent, requestFeedback, scheduleInterview, completeInterview } = useDemoExperience();
   const uiCopy = translations[language];
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -244,7 +244,7 @@ export default function CandidateProfilePage() {
         </header>
 
         <main className="main-content">
-          <section className="candidate-hero">
+          <section className="candidate-hero" data-guided-target="candidate-profile">
             <div className="candidate-hero__identity">
               <div className="candidate-avatar">MC</div>
               <div>
@@ -257,6 +257,9 @@ export default function CandidateProfilePage() {
                   <span>{copy.locationValue}</span>
                   <span>{copy.salaryValue}</span>
                   <span>{copy.availabilityText}</span>
+                  <span>
+                    {language === "en" ? "Owner" : "Responsable"}: {state.candidates["maya-chen"]?.assignedRecruiter ?? "Sarah Martin"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -385,9 +388,26 @@ export default function CandidateProfilePage() {
           <div className="content-grid">
             <Card title={copy.documents} description={language === "en" ? "Material readiness and source links" : "Préparation des documents et liens sources"}>
               <div className="interview-actions" style={{ marginBottom: "12px" }}>
-                <button type="button" className="btn btn--secondary" onClick={() => togglePrepared("maya-chen")}>{state.candidates["maya-chen"]?.prepared ? (language === "en" ? "Prepared" : "Préparé") : (language === "en" ? "Mark as prepared" : "Marquer comme préparé")}</button>
+                <button
+                  type="button"
+                  className="btn btn--secondary"
+                  onClick={() => openActionIntent({
+                    actionId: "mark-candidate-prepared",
+                    language,
+                    candidateId: "maya-chen",
+                    owner: state.candidates["maya-chen"]?.assignedRecruiter ?? "Sarah Martin",
+                    interviewLabel: "Today 10:30",
+                  })}
+                >
+                  {state.candidates["maya-chen"]?.prepared ? (language === "en" ? "Prepared" : "Prepare") : (language === "en" ? "Mark as prepared" : "Marquer comme prepare")}
+                </button>
                 <button type="button" className="btn btn--secondary" onClick={() => requestFeedback("maya-chen")}>{state.candidates["maya-chen"]?.feedbackRequested ? (language === "en" ? "Feedback requested" : "Feedback demandé") : (language === "en" ? "Request feedback" : "Demander un feedback")}</button>
                 <button type="button" className="btn btn--primary" onClick={() => completeInterview("maya-chen")}>{language === "en" ? "Complete interview" : "Terminer l’entretien"}</button>
+              </div>
+
+              <div className="detail-card" style={{ marginBottom: "12px" }}>
+                <p>{language === "en" ? "Salary alignment status" : "Statut alignement salarial"}</p>
+                <strong>{state.candidates["maya-chen"]?.salaryAligned ? (language === "en" ? "Complete" : "Termine") : (language === "en" ? "Pending" : "En attente")}</strong>
               </div>
               <div className="document-list">
                 {documents.map((document) => (

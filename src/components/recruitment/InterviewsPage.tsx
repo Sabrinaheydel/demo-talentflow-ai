@@ -36,7 +36,7 @@ function getStatusTone(status: string) {
 
 export function InterviewsPage({ language }: { language: "en" | "fr" }) {
   const router = useRouter();
-  const { state, togglePrepared, requestFeedback, scheduleInterview, completeInterview } = useDemoExperience();
+  const { state, openActionIntent, requestFeedback, scheduleInterview, completeInterview } = useDemoExperience();
   const [activeCandidateId, setActiveCandidateId] = useState("maya-chen");
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("all");
@@ -508,8 +508,13 @@ export function InterviewsPage({ language }: { language: "en" | "fr" }) {
                     type="button"
                     className="btn btn--secondary"
                     onClick={() => {
-                      togglePrepared(selectedCandidate.id);
-                      setToast(copy.toastPrepared);
+                      openActionIntent({
+                        actionId: "mark-candidate-prepared",
+                        language,
+                        candidateId: selectedCandidate.id,
+                        owner: state.candidates[selectedCandidate.id]?.assignedRecruiter ?? selectedCandidate.interviewers[0],
+                        interviewLabel: `${selectedCandidate.date} ${selectedCandidate.time}`,
+                      });
                     }}
                   >
                     {isPrepared ? copy.prepared : copy.markPrepared}
