@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { GUIDED_DEMO_SCENES, type GuidedDemoSceneId, useDemoExperience } from "../../lib/demoExperience";
 import { useLanguage } from "../../lib/i18n";
@@ -190,6 +190,7 @@ export function GuidedDemoOverlay() {
     finishGuidedDemo,
     markGuidedDemoActionPreviewOpened,
   } = useDemoExperience();
+  const [mounted, setMounted] = useState(false);
   const highlightedElRef = useRef<HTMLElement | null>(null);
   const sceneHandledRef = useRef<GuidedDemoSceneId | null>(null);
 
@@ -199,6 +200,10 @@ export function GuidedDemoOverlay() {
     () => (state.guidedDemo.running ? ((state.guidedDemo.sceneIndex + 1) / GUIDED_DEMO_SCENES.length) * 100 : 0),
     [state.guidedDemo.running, state.guidedDemo.sceneIndex],
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!currentScene) {
@@ -256,6 +261,10 @@ export function GuidedDemoOverlay() {
     router,
     state.guidedDemo.actionPreviewOpened,
   ]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>

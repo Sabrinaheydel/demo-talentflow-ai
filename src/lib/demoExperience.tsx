@@ -253,7 +253,16 @@ function writeStoredState(state: DemoExperienceState) {
 }
 
 export function DemoExperienceProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<DemoExperienceState>(() => readStoredState() ?? createInitialState());
+  const [state, setState] = useState<DemoExperienceState>(() => createInitialState());
+  const [storageHydrated, setStorageHydrated] = useState(false);
+
+  useEffect(() => {
+    const stored = readStoredState();
+    if (stored) {
+      setState(stored);
+    }
+    setStorageHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (!state.guidedDemo.running || !state.guidedDemo.sceneStartedAt) return;
@@ -315,8 +324,9 @@ export function DemoExperienceProvider({ children }: { children: React.ReactNode
   }, [state.guidedDemo.running, state.guidedDemo.sceneStartedAt]);
 
   useEffect(() => {
+    if (!storageHydrated) return;
     writeStoredState(state);
-  }, [state]);
+  }, [state, storageHydrated]);
 
   const value = useMemo<DemoExperienceContextValue>(() => ({
     state,
@@ -681,6 +691,15 @@ export function DemoExperienceProvider({ children }: { children: React.ReactNode
       setState((prev) => ({
         ...prev,
         storySteps: [...prev.storySteps.slice(-4), "Guided demo completed"],
+        actionExecution: {
+          ...prev.actionExecution,
+          activeActionId: null,
+          activeDefinition: null,
+          activePreview: null,
+          pendingConfirmation: false,
+          executionQueue: [],
+          lastExecutionResult: null,
+        },
         guidedDemo: {
           ...prev.guidedDemo,
           running: false,
