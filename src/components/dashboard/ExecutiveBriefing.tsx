@@ -58,6 +58,7 @@ export function ExecutiveBriefing({
             className={`briefing-mode-pill ${activeBriefingType === mode.id ? "is-active" : ""}`}
             onClick={() => mode.enabled && onBriefingTypeChange(mode.id)}
             disabled={!mode.enabled}
+            title={!mode.enabled ? (language === "en" ? "Available in the next product iteration." : "Disponible dans la prochaine iteration produit.") : undefined}
           >
             {language === "en" ? mode.en : mode.fr}
           </button>
@@ -88,7 +89,7 @@ export function ExecutiveBriefing({
           <p className="briefing-priority-title">{packet.priorityOne.title}</p>
           <p className="briefing-priority-deadline">{packet.priorityOne.deadline}</p>
           <p className="briefing-priority-owner">
-            {language === "en" ? "Owner" : "Owner"}: {packet.priorityOne.owner}
+            {language === "en" ? "Owner" : "Responsable"}: {packet.priorityOne.owner}
           </p>
           <ul>
             {packet.priorityOne.whyNow.map((reason) => (

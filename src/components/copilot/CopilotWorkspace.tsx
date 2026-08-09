@@ -837,7 +837,7 @@ export function CopilotWorkspace({ language, initialContext }: { language: Langu
             <h2>{copy.subtitle}</h2>
           </div>
           <div className="candidate-summary__chips">
-            <Badge label="Live" tone="success" />
+            <Badge label={language === "en" ? "Interactive Demo" : "Simulation interactive"} tone="success" />
             <span className="demo-pill">{language === "en" ? "Demo data" : "Données de démo"}</span>
           </div>
         </div>

@@ -27,7 +27,7 @@ export function InsightsPanel({ language, insights }: InsightsPanelProps) {
             <strong>{language === "en" ? "Action:" : "Action :"}</strong> {item.recommendedAction}
           </p>
           <p className="recommendation-card__owner">
-            <strong>{language === "en" ? "Owner:" : "Owner :"}</strong> {item.suggestedOwner}
+            <strong>{language === "en" ? "Owner:" : "Responsable :"}</strong> {item.suggestedOwner}
           </p>
           <div className="recommendation-card__meta-grid">
             <span className="badge badge--neutral">{language === "en" ? "Signal" : "Signal"}</span>

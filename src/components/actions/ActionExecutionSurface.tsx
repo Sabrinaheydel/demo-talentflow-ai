@@ -9,7 +9,7 @@ function screenLabel(screen: string, language: "en" | "fr") {
   if (screen === "pipeline") return language === "en" ? "Pipeline" : "Pipeline";
   if (screen === "candidate-profile") return language === "en" ? "Candidate Profile" : "Profil candidat";
   if (screen === "interviews") return language === "en" ? "Interviews" : "Entretiens";
-  if (screen === "team") return language === "en" ? "Team" : "Equipe";
+  if (screen === "team") return language === "en" ? "Team" : "Équipe";
   if (screen === "copilot") return "Copilot";
   return screen;
 }
@@ -64,8 +64,8 @@ export function ActionExecutionSurface() {
         <div className="interview-actions" style={{ justifyContent: "space-between", marginTop: 0 }}>
           <p className="eyebrow" style={{ margin: 0 }}>
             {preview
-              ? (language === "en" ? "Action preview" : "Apercu de l'action")
-              : (language === "en" ? "Action completed" : "Action terminee")}
+              ? (language === "en" ? "Action preview" : "Aperçu de l'action")
+              : (language === "en" ? "Action completed" : "Action terminée")}
           </p>
           <button
             ref={closeRef}
@@ -74,7 +74,7 @@ export function ActionExecutionSurface() {
             aria-label={language === "en" ? "Close action surface" : "Fermer la vue action"}
             onClick={dismissActionSurface}
           >
-            x
+            ×
           </button>
         </div>
 
@@ -90,10 +90,17 @@ export function ActionExecutionSurface() {
               <div className="detail-card"><p>{language === "en" ? "Confirmation" : "Confirmation"}</p><strong>{preview.confirmationLevel}</strong></div>
             </div>
 
+            <div className="action-surface-block">
+              <h5>{language === "en" ? "Impact" : "Impact"}</h5>
+              <ul className="bullet-list">
+                {preview.expectedImpact.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </div>
+
             {preview.messagePreview ? (
               <div className="action-surface-block">
-                <h5>{language === "en" ? "Message preview" : "Apercu message"}</h5>
-                <p><strong>{language === "en" ? "Sender" : "Expediteur"}:</strong> {preview.messagePreview.sender}</p>
+                <h5>{language === "en" ? "Message preview" : "Aperçu message"}</h5>
+                <p><strong>{language === "en" ? "Sender" : "Expéditeur"}:</strong> {preview.messagePreview.sender}</p>
                 <p><strong>{language === "en" ? "Recipient" : "Destinataire"}:</strong> {preview.messagePreview.recipient}</p>
                 {preview.messagePreview.subject ? <p><strong>{language === "en" ? "Subject" : "Objet"}:</strong> {preview.messagePreview.subject}</p> : null}
                 <div className="action-message-preview">
@@ -103,7 +110,7 @@ export function ActionExecutionSurface() {
             ) : null}
 
             <div className="action-surface-block">
-              <h5>{language === "en" ? "TalentFlow will update" : "TalentFlow mettra a jour"}</h5>
+              <h5>{language === "en" ? "TalentFlow will update" : "TalentFlow mettra à jour"}</h5>
               <ul className="bullet-list">
                 {preview.currentState.map((item) => (
                   <li key={item.label}>{item.label}: {item.before} {"->"} {item.after}</li>
@@ -112,8 +119,8 @@ export function ActionExecutionSurface() {
             </div>
 
             <div className="action-surface-block">
-              <h5>{language === "en" ? "Affected screens" : "Ecrans impactes"}</h5>
-              <p>{preview.affectedScreens.map((item) => screenLabel(item, language)).join(" - ")}</p>
+              <h5>{language === "en" ? "Affected screens" : "Écrans impactés"}</h5>
+              <p>{preview.affectedScreens.map((item) => screenLabel(item, language)).join(" • ")}</p>
               <ul className="bullet-list">
                 {preview.kpiChanges.map((item) => <li key={item}>{item}</li>)}
                 {preview.priorityChanges.map((item) => <li key={item}>{item}</li>)}
@@ -134,14 +141,15 @@ export function ActionExecutionSurface() {
         {result ? (
           <>
             <h4 id="action-surface-title" style={{ marginBottom: "4px" }}>{result.action}</h4>
-            <p>{language === "en" ? "Execution summary" : "Resume d'execution"}</p>
+            <p>{language === "en" ? "Execution summary" : "Résumé d'exécution"}</p>
+            <p className="demo-disclaimer">{language === "en" ? "Demo mode - simulated execution" : "Mode démo - exécution simulée"}</p>
             <div className="action-surface-block">
               <ul className="bullet-list">
                 {result.completedItems.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </div>
             <div className="action-surface-block">
-              <h5>{language === "en" ? "Before / After" : "Avant / Apres"}</h5>
+              <h5>{language === "en" ? "Before / After" : "Avant / Après"}</h5>
               <ul className="bullet-list">
                 {result.updatedState.map((item) => (
                   <li key={item.label}>{item.label}: {item.before} {"->"} {item.after}</li>
@@ -149,9 +157,9 @@ export function ActionExecutionSurface() {
               </ul>
             </div>
             <div className="action-surface-block">
-              <h5>{language === "en" ? "Affected screens" : "Ecrans impactes"}</h5>
-              <p>{result.affectedScreens.map((item) => screenLabel(item, language)).join(" - ")}</p>
-              <p><strong>{language === "en" ? "Next recommended action" : "Prochaine action recommandee"}:</strong> {result.recommendedNextAction}</p>
+              <h5>{language === "en" ? "Affected screens" : "Écrans impactés"}</h5>
+              <p>{result.affectedScreens.map((item) => screenLabel(item, language)).join(" • ")}</p>
+              <p><strong>{language === "en" ? "Next Action" : "Action suivante"}:</strong> {result.recommendedNextAction}</p>
             </div>
             <div className="modal-actions">
               <button type="button" className="btn btn--primary" onClick={dismissActionSurface}>

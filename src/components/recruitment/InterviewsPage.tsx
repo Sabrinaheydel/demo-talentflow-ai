@@ -2,22 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "../ui/Badge";
 import { getInterviewCandidateById, interviewCandidates, type InterviewCandidate } from "../../lib/demoData";
 import { useDemoExperience } from "../../lib/demoExperience";
-
-type DemoState = {
-  preparedCandidates: string[];
-  feedbackRequests: string[];
-};
-
-function createInitialDemoState(): DemoState {
-  return {
-    preparedCandidates: [],
-    feedbackRequests: [],
-  };
-}
 
 function getInitials(name: string) {
   return name
@@ -36,36 +24,14 @@ function getStatusTone(status: string) {
 
 export function InterviewsPage({ language }: { language: "en" | "fr" }) {
   const router = useRouter();
-  const { state, openActionIntent, requestFeedback, scheduleInterview, completeInterview } = useDemoExperience();
+  const { state, openActionIntent } = useDemoExperience();
   const [activeCandidateId, setActiveCandidateId] = useState("maya-chen");
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("all");
   const [recruiterFilter, setRecruiterFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "priority">("date");
-  const [demoState, setDemoState] = useState<DemoState>(createInitialDemoState);
   const [toast, setToast] = useState<string | null>(null);
-  const [modal, setModal] = useState<{ title: string; description: string; confirmLabel: string; message: string } | null>(null);
-  const modalCloseButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    if (!modal) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setModal(null);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
-    modalCloseButtonRef.current?.focus();
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [modal]);
 
   const copy = language === "en"
     ? {
@@ -292,12 +258,15 @@ export function InterviewsPage({ language }: { language: "en" | "fr" }) {
             <button
               type="button"
               className="btn btn--primary"
-              onClick={() => setModal({
-                title: copy.modalTitle,
-                description: copy.modalBody,
-                confirmLabel: copy.modalConfirm,
-                message: copy.toastSchedule,
-              })}
+              onClick={() => {
+                openActionIntent({
+                  actionId: "schedule-candidate-interview",
+                  language,
+                  candidateId: selectedCandidate.id,
+                  owner: state.candidates[selectedCandidate.id]?.assignedRecruiter ?? selectedCandidate.interviewers[0],
+                  interviewLabel: `${selectedCandidate.date} ${selectedCandidate.time}`,
+                });
+              }}
             >
               {copy.actions.schedule}
             </button>
@@ -546,8 +515,23 @@ export function InterviewsPage({ language }: { language: "en" | "fr" }) {
                     type="button"
                     className="btn btn--secondary"
                     onClick={() => {
-                      requestFeedback(selectedCandidate.id);
-                      setToast(copy.toastFeedback);
+                      if (selectedCandidate.id === "emma-laurent") {
+                        openActionIntent({
+                          actionId: "request-emma-feedback",
+                          language,
+                          owner: state.candidates[selectedCandidate.id]?.assignedRecruiter ?? selectedCandidate.interviewers[0],
+                          recipient: "David Klein",
+                        });
+                        return;
+                      }
+
+                      openActionIntent({
+                        actionId: "request-candidate-feedback",
+                        language,
+                        candidateId: selectedCandidate.id,
+                        owner: state.candidates[selectedCandidate.id]?.assignedRecruiter ?? selectedCandidate.interviewers[0],
+                        recipient: selectedCandidate.interviewers[0],
+                      });
                     }}
                   >
                     {copy.requestFeedback}
@@ -577,9 +561,12 @@ export function InterviewsPage({ language }: { language: "en" | "fr" }) {
                     type="button"
                     className="btn btn--primary"
                     onClick={() => {
-                      completeInterview(selectedCandidate.id);
-                      router.push(`/copilot?candidate=${selectedCandidate.id}&mode=follow-up`);
-                      setToast(copy.toastFollowUp);
+                      openActionIntent({
+                        actionId: "complete-candidate-interview",
+                        language,
+                        candidateId: selectedCandidate.id,
+                        owner: state.candidates[selectedCandidate.id]?.assignedRecruiter ?? selectedCandidate.interviewers[0],
+                      });
                     }}
                   >
                     {copy.askFollowUp}
@@ -590,24 +577,6 @@ export function InterviewsPage({ language }: { language: "en" | "fr" }) {
           </div>
         </div>
       </section>
-
-      {modal ? (
-        <div className="modal-backdrop" role="presentation" onClick={() => setModal(null)}>
-          <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="interview-modal-title" onClick={(event) => event.stopPropagation()}>
-            <div className="interview-actions" style={{ justifyContent: "flex-end" }}>
-              <button ref={modalCloseButtonRef} type="button" className="btn btn--ghost" aria-label={language === "en" ? "Close dialog" : "Fermer la boîte de dialogue"} onClick={() => setModal(null)}>
-                ×
-              </button>
-            </div>
-            <h4 id="interview-modal-title">{modal.title}</h4>
-            <p>{modal.description}</p>
-            <div className="modal-actions">
-              <button type="button" className="btn btn--secondary" onClick={() => setModal(null)}>{language === "en" ? "Cancel" : "Annuler"}</button>
-              <button type="button" className="btn btn--primary" onClick={() => { scheduleInterview(selectedCandidate.id); setModal(null); setToast(modal.message); }}>{modal.confirmLabel}</button>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
       {toast ? <div className="toast" role="status">{toast}</div> : null}
     </div>

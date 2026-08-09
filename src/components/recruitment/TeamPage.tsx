@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "../ui/Badge";
 import { canonicalCandidates } from "../../lib/demoData";
 import { useDemoExperience } from "../../lib/demoExperience";
@@ -17,10 +17,10 @@ type TeamMember = {
   name: string;
   role: string;
   title: string;
-  workload: number;
-  interviewsToday: number;
-  assignedCandidates: number;
+  baselineWorkload: number;
   pendingFeedback: number;
+  baselineOpenActions: number;
+  baselineAssignedCandidates: number;
   status: TeamStatus;
   candidateIds: string[];
 };
@@ -31,10 +31,10 @@ const teamMembers: TeamMember[] = [
     name: "Sarah Martin",
     role: "Talent Acquisition Lead",
     title: "Talent Acquisition Lead",
-    workload: 92,
-    interviewsToday: 2,
-    assignedCandidates: 8,
+    baselineWorkload: 92,
     pendingFeedback: 1,
+    baselineOpenActions: 6,
+    baselineAssignedCandidates: 5,
     status: "Busy",
     candidateIds: ["maya-chen", "lucas-martin", "emma-laurent", "noah-williams"],
   },
@@ -43,10 +43,10 @@ const teamMembers: TeamMember[] = [
     name: "Thomas Lee",
     role: "Senior Recruiter",
     title: "Senior Recruiter",
-    workload: 74,
-    interviewsToday: 1,
-    assignedCandidates: 6,
+    baselineWorkload: 74,
     pendingFeedback: 0,
+    baselineOpenActions: 5,
+    baselineAssignedCandidates: 4,
     status: "Available",
     candidateIds: ["maya-chen", "lucas-martin"],
   },
@@ -55,10 +55,10 @@ const teamMembers: TeamMember[] = [
     name: "David Klein",
     role: "Hiring Manager",
     title: "Hiring Manager",
-    workload: 81,
-    interviewsToday: 2,
-    assignedCandidates: 5,
+    baselineWorkload: 81,
     pendingFeedback: 2,
+    baselineOpenActions: 4,
+    baselineAssignedCandidates: 3,
     status: "In meetings",
     candidateIds: ["emma-laurent", "noah-williams"],
   },
@@ -67,14 +67,26 @@ const teamMembers: TeamMember[] = [
     name: "Emily Carter",
     role: "Recruiter",
     title: "Recruiter",
-    workload: 65,
-    interviewsToday: 0,
-    assignedCandidates: 5,
+    baselineWorkload: 65,
     pendingFeedback: 2,
+    baselineOpenActions: 4,
+    baselineAssignedCandidates: 3,
     status: "Available",
     candidateIds: ["lucas-martin", "noah-williams"],
   },
 ];
+
+type TeamMetricDelta = {
+  openActions: number;
+  candidates: number;
+  workload: number;
+};
+
+type TeamDynamicSnapshot = {
+  openActions: number;
+  candidates: number;
+  workload: number;
+};
 
 export function TeamPage({ language }: { language: "en" | "fr" }) {
   const router = useRouter();
@@ -85,6 +97,9 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
   const [availabilityFilter, setAvailabilityFilter] = useState<AvailabilityFilter>("all");
   const [workloadFilter, setWorkloadFilter] = useState<WorkloadBand>("all");
   const [feedbackFilter, setFeedbackFilter] = useState<PendingFeedbackBand>("all");
+  const [metricDeltas, setMetricDeltas] = useState<Record<string, TeamMetricDelta>>({});
+  const previousSnapshotRef = useRef<Record<string, TeamDynamicSnapshot>>({});
+  const clearDeltaTimerRef = useRef<number | null>(null);
 
   const copy = language === "en"
     ? {
@@ -135,10 +150,10 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
           high: "High",
         },
         metrics: {
-          interviewsToday: "Interviews today",
+          openActions: "Open actions",
           assignedCandidates: "Assigned candidates",
           pendingFeedback: "Pending feedback",
-          currentStatus: "Current status",
+          currentStatus: "Load level",
           workload: "Workload",
         },
         actions: {
@@ -197,23 +212,148 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
           high: "Élevé",
         },
         metrics: {
-          interviewsToday: "Entretiens aujourd’hui",
+          openActions: "Actions ouvertes",
           assignedCandidates: "Candidats assignés",
           pendingFeedback: "Feedbacks en attente",
-          currentStatus: "Statut actuel",
+          currentStatus: "Niveau de charge",
           workload: "Charge",
         },
         actions: {
-          assign: "Le flux d'assignation est ouvert avec impact avant/apres explicite.",
+          assign: "Le flux d'assignation est ouvert avec impact avant/après explicite.",
           workload: "La vue de charge a été mise à jour pour le mix actuel de l’équipe.",
-          feedback: "Le flux de demande de feedback final est ouvert avec apercu de message deterministe.",
+          feedback: "Le flux de demande de feedback final est ouvert avec aperçu de message déterministe.",
           interview: "L’espace d’entretien a été ouvert.",
           copilot: "Le Copilot a été ouvert avec un contexte équipe.",
         },
       };
 
+  const assignmentsByRecruiter = useMemo(() => {
+    const grouped: Record<string, string[]> = {};
+
+    Object.entries(state.candidates).forEach(([candidateId, candidateState]) => {
+      const recruiterName = candidateState.assignedRecruiter;
+      if (!grouped[recruiterName]) {
+        grouped[recruiterName] = [];
+      }
+      grouped[recruiterName].push(candidateId);
+    });
+
+    return grouped;
+  }, [state.candidates]);
+
+  const dynamicMembers = useMemo(() => {
+    return teamMembers.map((member) => {
+      const assignedCandidateIds = assignmentsByRecruiter[member.name] ?? [];
+      const candidateDelta = assignedCandidateIds.length - member.baselineAssignedCandidates;
+      const openActions = assignedCandidateIds.reduce((count, candidateId) => {
+        const candidateState = state.candidates[candidateId];
+        if (!candidateState) return count;
+
+        const needsAction =
+          !candidateState.prepared ||
+          !candidateState.feedbackRequested ||
+          candidateState.feedbackState !== "complete" ||
+          candidateState.offerRisk === "high" ||
+          !candidateState.priorityResolved;
+
+        return needsAction ? count + 1 : count;
+      }, 0);
+
+      const openActionDelta = openActions - member.baselineOpenActions;
+      const pendingFeedback = assignedCandidateIds.reduce((count, candidateId) => {
+        const candidateState = state.candidates[candidateId];
+        if (!candidateState) return count;
+        return candidateState.feedbackState === "complete" ? count : count + 1;
+      }, 0);
+
+      const workload = Math.max(
+        45,
+        Math.min(
+          98,
+          member.baselineWorkload + candidateDelta * 6 + openActionDelta * 3,
+        ),
+      );
+
+      const loadLevel = workload > 85
+        ? (language === "en" ? "High" : "Élevé")
+        : workload >= 70
+          ? (language === "en" ? "Medium" : "Moyenne")
+          : (language === "en" ? "Low" : "Faible");
+
+      return {
+        ...member,
+        assignedCandidateIds,
+        openActions,
+        pendingFeedback,
+        workload,
+        loadLevel,
+      };
+    });
+  }, [assignmentsByRecruiter, language, state.candidates]);
+
+  const teamKpis = useMemo(() => {
+    const totalAssigned = dynamicMembers.reduce((sum, member) => sum + member.assignedCandidateIds.length, 0);
+    const totalPending = dynamicMembers.reduce((sum, member) => sum + member.pendingFeedback, 0);
+    const averageWorkload = Math.round(dynamicMembers.reduce((sum, member) => sum + member.workload, 0) / Math.max(dynamicMembers.length, 1));
+
+    return language === "en"
+      ? [
+          { label: "Recruiters", value: `${dynamicMembers.length}` },
+          { label: "Candidates assigned", value: `${totalAssigned}` },
+          { label: "Feedback pending", value: `${totalPending}` },
+          { label: "Average workload", value: `${averageWorkload}%` },
+        ]
+      : [
+          { label: "Recruteurs", value: `${dynamicMembers.length}` },
+          { label: "Candidats assignés", value: `${totalAssigned}` },
+          { label: "Feedbacks en attente", value: `${totalPending}` },
+          { label: "Charge moyenne", value: `${averageWorkload}%` },
+        ];
+  }, [dynamicMembers, language]);
+
+  useEffect(() => {
+    const nextDeltas: Record<string, TeamMetricDelta> = {};
+
+    dynamicMembers.forEach((member) => {
+      const snapshot: TeamDynamicSnapshot = {
+        openActions: member.openActions,
+        candidates: member.assignedCandidateIds.length,
+        workload: member.workload,
+      };
+
+      const previous = previousSnapshotRef.current[member.id];
+      if (previous) {
+        const openActions = snapshot.openActions - previous.openActions;
+        const candidates = snapshot.candidates - previous.candidates;
+        const workload = snapshot.workload - previous.workload;
+        if (openActions || candidates || workload) {
+          nextDeltas[member.id] = { openActions, candidates, workload };
+        }
+      }
+
+      previousSnapshotRef.current[member.id] = snapshot;
+    });
+
+    if (Object.keys(nextDeltas).length === 0) return;
+    setMetricDeltas(nextDeltas);
+
+    if (clearDeltaTimerRef.current) {
+      window.clearTimeout(clearDeltaTimerRef.current);
+    }
+    clearDeltaTimerRef.current = window.setTimeout(() => {
+      setMetricDeltas({});
+      clearDeltaTimerRef.current = null;
+    }, 1400);
+  }, [dynamicMembers]);
+
+  useEffect(() => () => {
+    if (clearDeltaTimerRef.current) {
+      window.clearTimeout(clearDeltaTimerRef.current);
+    }
+  }, []);
+
   const visibleMembers = useMemo(() => {
-    return teamMembers.filter((member) => {
+    return dynamicMembers.filter((member) => {
       const matchesRecruiter = recruiterFilter === "all" || member.name === recruiterFilter;
       const matchesRole = roleFilter === "all" || member.role === roleFilter;
       const matchesAvailability = availabilityFilter === "all"
@@ -230,7 +370,7 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
 
       return matchesRecruiter && matchesRole && matchesAvailability && matchesWorkload && matchesFeedback;
     });
-  }, [availabilityFilter, feedbackFilter, recruiterFilter, roleFilter, workloadFilter]);
+  }, [availabilityFilter, dynamicMembers, feedbackFilter, recruiterFilter, roleFilter, workloadFilter]);
 
   const recruiterOptions = ["all", ...teamMembers.map((member) => member.name)];
   const roleOptions = ["all", ...teamMembers.map((member) => member.role)];
@@ -252,7 +392,7 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
         </div>
 
         <div className="team-kpi-grid">
-          {copy.kpis.map((item) => (
+          {teamKpis.map((item) => (
             <div key={item.label} className="detail-card">
               <p>{item.label}</p>
               <strong>{item.value}</strong>
@@ -360,12 +500,26 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
 
               <div className="team-card__metrics">
                 <div>
-                  <span>{copy.metrics.interviewsToday}</span>
-                  <strong>{member.interviewsToday}</strong>
+                  <span>{copy.metrics.openActions}</span>
+                  <strong>
+                    {member.openActions}
+                    {metricDeltas[member.id]?.openActions ? (
+                      <em className={`team-delta ${metricDeltas[member.id].openActions > 0 ? "team-delta--up" : "team-delta--down"}`}>
+                        {metricDeltas[member.id].openActions > 0 ? `+${metricDeltas[member.id].openActions}` : metricDeltas[member.id].openActions}
+                      </em>
+                    ) : null}
+                  </strong>
                 </div>
                 <div>
                   <span>{copy.metrics.assignedCandidates}</span>
-                  <strong>{member.assignedCandidates}</strong>
+                  <strong>
+                    {member.assignedCandidateIds.length}
+                    {metricDeltas[member.id]?.candidates ? (
+                      <em className={`team-delta ${metricDeltas[member.id].candidates > 0 ? "team-delta--up" : "team-delta--down"}`}>
+                        {metricDeltas[member.id].candidates > 0 ? `+${metricDeltas[member.id].candidates}` : metricDeltas[member.id].candidates}
+                      </em>
+                    ) : null}
+                  </strong>
                 </div>
                 <div>
                   <span>{copy.metrics.pendingFeedback}</span>
@@ -373,14 +527,21 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
                 </div>
                 <div>
                   <span>{copy.metrics.currentStatus}</span>
-                  <strong>{member.status}</strong>
+                  <strong>{member.loadLevel}</strong>
                 </div>
               </div>
 
               <div className="team-card__workload" aria-label={`${member.name} workload ${member.workload}%`}>
                 <div className="team-card__workload-label">
                   <span>{copy.metrics.workload}</span>
-                  <strong>{member.workload}%</strong>
+                  <strong>
+                    {member.workload}%
+                    {metricDeltas[member.id]?.workload ? (
+                      <em className={`team-delta ${metricDeltas[member.id].workload > 0 ? "team-delta--up" : "team-delta--down"}`}>
+                        {metricDeltas[member.id].workload > 0 ? `+${metricDeltas[member.id].workload}` : metricDeltas[member.id].workload}
+                      </em>
+                    ) : null}
+                  </strong>
                 </div>
                 <div className={`workload-bar workload-bar--${workloadBand(member.workload)}`}>
                   <span style={{ width: `${member.workload}%` }} />
@@ -392,7 +553,7 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
                   <h5>{copy.assignedTitle}</h5>
                 </div>
                 <ul>
-                  {member.candidateIds.map((candidateId) => {
+                  {member.assignedCandidateIds.map((candidateId) => {
                     const candidate = canonicalCandidates.find((item) => item.id === candidateId);
                     if (!candidate) return null;
                     return (
@@ -416,7 +577,7 @@ export function TeamPage({ language }: { language: "en" | "fr" }) {
                     owner: state.candidates["maya-chen"]?.assignedRecruiter ?? "Sarah Martin",
                     newOwner: member.name,
                   });
-                }}>{copy.tertiaryAction}</button>
+                }}>{copy.primaryAction}</button>
                 <button type="button" className="btn btn--ghost" onClick={() => router.push("/interviews")}>{copy.openInterview}</button>
               </div>
             </article>

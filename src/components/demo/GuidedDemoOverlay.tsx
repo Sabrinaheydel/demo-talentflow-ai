@@ -18,7 +18,7 @@ type GuidedCopy = {
   replay: string;
   progressLabel: string;
   finalTitle: string;
-  finalSubtitle: string;
+  finalSubtitleLines: string[];
   finalCta: string;
   scenes: Record<GuidedDemoSceneId, SceneCopy>;
   chain: string[];
@@ -33,54 +33,41 @@ const copyByLanguage: Record<"en" | "fr", GuidedCopy> = {
     skip: "Skip",
     replay: "Replay guided demo",
     progressLabel: "Guided demonstration",
-    finalTitle: "TalentFlow",
-    finalSubtitle: "Built with an AI Product Operating System.",
+    finalTitle: "Built with my AI Product Operating System",
+    finalSubtitleLines: [
+      "I don't ask AI to build products.",
+      "I direct an AI Product Team.",
+    ],
     finalCta: "Explore freely",
     scenes: {
       "scene-1": {
         lines: [
-          "Imagine returning after one week away.",
-          "Instead of searching everywhere,",
-          "TalentFlow immediately explains what changed,",
-          "what is at risk,",
-          "and where to start.",
+          "What happened: TalentFlow surfaces every critical change the moment you return.",
         ],
       },
       "scene-2": {
         lines: [
-          "These are not reporting metrics.",
-          "They are decision metrics.",
-          "Every KPI answers whether action is required.",
+          "Why it matters: each KPI is a decision signal, not a passive report.",
         ],
       },
       "scene-3": {
         lines: [
-          "The AI does not simply summarize.",
-          "It explains WHY",
-          "and WHAT TO DO NEXT.",
+          "What requires action: the system flags blockers, ownership gaps, and urgency.",
         ],
       },
       "scene-4": {
         lines: [
-          "Every important action is transparent.",
-          "Before executing, you know exactly",
-          "who will be notified,",
-          "what message will be sent,",
-          "what data will change,",
-          "and what happens next.",
+          "How AI helps: it proposes the next best move with explicit rationale.",
         ],
       },
       "scene-5": {
         lines: [
-          "Every screen shares the same product state.",
-          "No conflicting information.",
+          "How execution is transparent: preview first, execute second, track impact end-to-end.",
         ],
       },
       "scene-6": {
         lines: [
-          "The AI suggests.",
-          "The execution engine remains deterministic.",
-          "Humans stay in control.",
+          "Why every screen is synchronized: one shared state keeps every view aligned in real time.",
         ],
       },
       "scene-7": {
@@ -89,70 +76,58 @@ const copyByLanguage: Record<"en" | "fr", GuidedCopy> = {
     },
     chain: [
       "Business Problem",
-      "Product Strategy",
-      "Architecture",
-      "Implementation",
-      "QA",
+      "AI Strategist",
+      "AI Architect",
+      "AI Builder",
+      "AI QA",
+      "Human Review",
       "Release",
       "Continuous Iteration",
     ],
   },
   fr: {
     openingTitle: "Bienvenue dans TalentFlow",
-    openingSubtitle: "Une demonstration Product Builder.",
-    openingDuration: "Duree : 90 secondes",
-    startCta: "Demarrer la demo guidee",
+    openingSubtitle: "Une démonstration de Product Builder.",
+    openingDuration: "Durée : 90 secondes",
+    startCta: "Démarrer la démo guidée",
     skip: "Passer",
-    replay: "Rejouer la demo guidee",
-    progressLabel: "Demonstration guidee",
-    finalTitle: "TalentFlow",
-    finalSubtitle: "Construit avec un AI Product Operating System.",
+    replay: "Rejouer la démo guidée",
+    progressLabel: "Démonstration guidée",
+    finalTitle: "Built with my AI Product Operating System",
+    finalSubtitleLines: [
+      "I don't ask AI to build products.",
+      "I direct an AI Product Team.",
+    ],
     finalCta: "Explorer librement",
     scenes: {
       "scene-1": {
         lines: [
-          "Imaginez revenir apres une semaine d'absence.",
-          "Au lieu de chercher partout,",
-          "TalentFlow explique immediatement ce qui a change,",
-          "ce qui est a risque,",
-          "et par ou commencer.",
+          "Ce qui s'est passé : TalentFlow affiche immédiatement les changements critiques.",
         ],
       },
       "scene-2": {
         lines: [
-          "Ce ne sont pas des metriques de reporting.",
-          "Ce sont des metriques de decision.",
-          "Chaque KPI indique si une action est necessaire.",
+          "Pourquoi c'est important : chaque KPI guide une décision concrète.",
         ],
       },
       "scene-3": {
         lines: [
-          "L'IA ne fait pas qu'un resume.",
-          "Elle explique POURQUOI",
-          "et QUOI FAIRE ENSUITE.",
+          "Ce qui requiert une action : les blocages et urgences sont priorisés clairement.",
         ],
       },
       "scene-4": {
         lines: [
-          "Chaque action importante est transparente.",
-          "Avant execution, vous savez exactement",
-          "qui sera notifie,",
-          "quel message sera envoye,",
-          "quelles donnees vont changer,",
-          "et ce qui se passe ensuite.",
+          "Comment l'IA aide : elle propose la meilleure action suivante avec justification.",
         ],
       },
       "scene-5": {
         lines: [
-          "Chaque ecran partage le meme etat produit.",
-          "Aucune information contradictoire.",
+          "Comment l'exécution reste transparente : aperçu d'abord, exécution ensuite, impact visible.",
         ],
       },
       "scene-6": {
         lines: [
-          "L'IA suggere.",
-          "Le moteur d'execution reste deterministe.",
-          "Les humains gardent le controle.",
+          "Pourquoi tous les écrans sont synchronisés : un état partagé maintient la cohérence.",
         ],
       },
       "scene-7": {
@@ -160,11 +135,12 @@ const copyByLanguage: Record<"en" | "fr", GuidedCopy> = {
       },
     },
     chain: [
-      "Probleme business",
-      "Strategie produit",
-      "Architecture",
-      "Implementation",
-      "QA",
+      "Problème business",
+      "AI Strategist",
+      "AI Architect",
+      "AI Builder",
+      "AI QA",
+      "Human Review",
       "Release",
       "Iteration continue",
     ],
@@ -292,8 +268,12 @@ export function GuidedDemoOverlay() {
           <div className="guided-demo-overlay" role="dialog" aria-modal="true" aria-labelledby="guided-demo-final-title">
             <div className="guided-demo-final-card" data-guided-target="guided-final">
               <h2 id="guided-demo-final-title">{copy.finalTitle}</h2>
-              <p>{copy.finalSubtitle}</p>
-              <div className="guided-demo-chain" aria-label={copy.finalSubtitle}>
+              <div className="guided-demo-final-subtitles" aria-label={copy.finalTitle}>
+                {copy.finalSubtitleLines.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+              </div>
+              <div className="guided-demo-chain" aria-label={copy.finalTitle}>
                 {copy.chain.map((item, index) => (
                   <div key={item} className="guided-demo-chain-row">
                     <span>{item}</span>
@@ -312,14 +292,14 @@ export function GuidedDemoOverlay() {
             </div>
           </div>
         ) : (
-          <div className="guided-demo-narration" role="status" aria-live="polite">
+          <div key={currentScene.id} className="guided-demo-narration guided-demo-narration--scene" role="status" aria-live="polite">
             <p className="guided-demo-narration__label">{copy.progressLabel}</p>
             <div className="guided-demo-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}>
               <span style={{ width: `${progress}%` }} />
             </div>
             <div className="guided-demo-lines">
-              {copy.scenes[currentScene.id].lines.map((line) => (
-                <p key={line}>{line}</p>
+              {copy.scenes[currentScene.id].lines.map((line, index) => (
+                <p key={line} style={{ animationDelay: `${index * 90}ms` }}>{line}</p>
               ))}
             </div>
             <div className="guided-demo-actions">

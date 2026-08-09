@@ -1407,6 +1407,47 @@ They should be framed clearly as intentional demo architecture choices, and the 
 
 # 14. Implementation Status
 
+## Action Transparency Final Polish sprint (Sprint 10)
+
+Status:
+- Implemented stability-focused Action Transparency polish using the existing shared execution engine
+
+Files modified:
+- src/lib/actionExecution.ts
+- src/components/actions/ActionExecutionSurface.tsx
+- src/components/recruitment/PriorityActions.tsx
+- src/components/recruitment/InterviewsPage.tsx
+- src/app/candidate-profile/page.tsx
+
+Implementation completed:
+- Reused the existing shared Action Execution Engine (no new modal framework)
+- Extended deterministic shared action contracts for remaining meaningful actions:
+   - request-candidate-feedback
+   - schedule-candidate-interview
+   - complete-candidate-interview
+- Migrated remaining high-impact Dashboard Priority actions to shared preview/result flow:
+   - Maya salary alignment
+   - Emma feedback request
+   - Lucas technical feedback closure
+   - Noah interview preparation
+- Migrated Interviews meaningful actions from local confirmation/toast logic to shared execution flow:
+   - schedule interview
+   - request feedback
+   - complete interview
+- Migrated Candidate Profile meaningful actions from local confirmation/toast logic to shared execution flow:
+   - schedule screen action
+   - request feedback
+   - complete interview
+- Improved shared Action Preview/Result clarity with explicit business impact section and demo-mode execution disclosure
+- Preserved deterministic demo-mode behavior with no real external communication or ATS update
+
+Build status:
+- Production build validated successfully after Sprint 10 Action Transparency Final Polish implementation
+
+Current known limitations:
+- Pipeline currently has no stage/ownership mutation controls exposed in UI, so no additional pipeline action migration was applied in this sprint step
+- Copilot remains recommendation-first and does not auto-execute meaningful state changes; execution continues to require explicit human action via shared execution surfaces
+
 ## Guided Demo Experience sprint (Sprint 9)
 
 Status:
@@ -2243,6 +2284,273 @@ Yes, with guardrails. The architecture is strong enough to migrate remaining hig
 ## 9. Single most important improvement before wider migration
 
 Enforce strict no-bypass policy for meaningful actions so every trigger path uses the shared engine preview/result lifecycle.
+
+# 15.4 QA Review — Final Portfolio Readiness (Pre-packaging)
+
+## 1. Executive QA summary
+
+TalentFlow now demonstrates a credible end-to-end Product Builder narrative: business context, decision-support dashboard, deterministic action transparency, and reusable shared state across core screens. The product is close to public portfolio quality and is strong enough to create interview momentum with recruiters, product leaders and technical stakeholders. The main remaining risks are localization consistency and a few credibility signals that can be interpreted as product over-claim in a public demo context.
+
+Overall verdict:
+- Public demo quality: strong
+- Product-builder signal: strong
+- Release status: READY WITH MINOR FIXES
+
+## 2. Critical issues
+
+- None.
+
+## 3. High issues
+
+### HIGH-1 — Mixed EN/FR terminology remains in key decision surfaces
+
+- Problem: some core labels still use English inside French UI (for example Owner/owner wording), reducing polish in recruiter-facing paths.
+- Why it matters: this is visible in high-impact briefing/action contexts and weakens portfolio-grade bilingual quality.
+- Evidence:
+   - src/components/recruitment/PriorityActions.tsx (Owner label)
+   - src/components/recruitment/InsightsPanel.tsx (Owner label)
+   - src/app/page.tsx (owner wording in FR card descriptions)
+
+### HIGH-2 — Reassignment credibility gap: workload metrics are static after ownership change
+
+- Problem: reassign actions update owner state, but workload metrics/cards remain static seeded values.
+- Why it matters: action transparency promise is "what changed" across affected surfaces; visible workload impact should match that promise.
+- Evidence:
+   - src/components/recruitment/TeamPage.tsx (static teamMembers workload/assigned counts)
+   - src/components/recruitment/TeamPage.tsx (reassign action trigger uses shared engine)
+
+### HIGH-3 — Copilot top badge can over-signal "live" while output is simulated
+
+- Problem: Copilot shows a prominent Live badge while also stating responses are simulated.
+- Why it matters: enterprise/client audiences can interpret "Live" as real provider-backed execution.
+- Evidence:
+   - src/components/copilot/CopilotWorkspace.tsx (Live badge)
+   - src/components/copilot/CopilotWorkspace.tsx (demo-mode simulated notice)
+
+## 4. Medium issues
+
+### MEDIUM-1 — Guided Demo unavailable modes are disabled but not explicitly framed as "not in this demo"
+
+- Problem: morning/weekly/end-of-day pills are disabled with reduced opacity but no explicit explanatory copy.
+- Why it matters: some reviewers may interpret them as incomplete rather than intentionally out of scope.
+- Evidence:
+   - src/components/dashboard/ExecutiveBriefing.tsx (disabled mode pills)
+
+### MEDIUM-2 — Modal keyboard containment is partial
+
+- Problem: Escape handling and initial focus are present, but strict tab focus trap is not fully enforced for modal surfaces.
+- Why it matters: accessibility polish gap for final portfolio standard.
+- Evidence:
+   - src/components/actions/ActionExecutionSurface.tsx
+
+### MEDIUM-3 — Final QA this pass is build + code-audit driven; no automated browser journey evidence attached
+
+- Problem: functional confidence is high but this report does not include recorded automated interaction traces.
+- Why it matters: residual risk for edge-case UI interactions on unusual browser/device states.
+
+## 5. Nice-to-have improvements
+
+- Add explicit "Demo mode" microcopy near disabled briefing modes.
+- Add one-line workload delta feedback after reassignment result.
+- Normalize French recruiter terminology (owner/responsable) in all action cards and preview blocks.
+- Replace or contextualize Copilot "Live" badge to avoid mixed interpretation.
+
+## Guided demo validation
+
+- Start/Skip/Replay/Finish controls are wired and deterministic.
+- Scene routing and highlight logic are state-driven and stable.
+- Scene 4 correctly triggers action preview entry.
+- Candidate Profile and Copilot transitions are present.
+- Normal use can continue after completion/skip.
+
+Evidence:
+- src/components/demo/GuidedDemoOverlay.tsx
+- src/lib/demoExperience.tsx
+
+Guided narrative quality:
+- Coherent and business-oriented.
+- Explains product thinking (decision-support + deterministic execution) better than feature-tour demos.
+
+## Dashboard intelligence validation
+
+- Absence and cover briefs communicate change/risk/priority clearly.
+- Priority actions are explicit and now mapped to shared execution for major paths.
+- Disabled future modes do not crash and are visually inactive.
+
+Evidence:
+- src/app/page.tsx
+- src/lib/dashboardBriefing.ts
+- src/components/dashboard/ExecutiveBriefing.tsx
+
+## Action execution engine validation
+
+Reference actions reviewed in current build:
+- Maya salary alignment
+- Emma feedback request
+- Lucas technical feedback request
+- Noah preparation
+- schedule interview
+- complete interview
+- reassign candidate
+
+Before execution coverage:
+- action, target, owner, recipient, channel
+- deterministic message preview
+- before/after state
+- affected surfaces
+- business impact
+- explicit confirmation CTA
+
+After execution coverage:
+- result summary
+- updated state
+- notified actor
+- next recommended action
+
+Evidence:
+- src/lib/actionExecution.ts
+- src/components/actions/ActionExecutionSurface.tsx
+- src/components/recruitment/PriorityActions.tsx
+- src/components/recruitment/InterviewsPage.tsx
+- src/app/candidate-profile/page.tsx
+
+## Copilot validation
+
+Principle check:
+- AI suggests, humans stay in control: PASS.
+- No silent meaningful state mutation path detected: PASS.
+- Demo-mode framing present: PASS.
+- Public-claim clarity needs polish due "Live" badge: PARTIAL.
+
+Evidence:
+- src/components/copilot/CopilotWorkspace.tsx
+
+## Cross-screen consistency validation
+
+For Maya/Emma/Lucas/Noah, shared state updates now propagate through the shared execution path to dashboard/interviews/profile/team/copilot summaries where applicable.
+
+Residual consistency risk:
+- Team workload numbers remain static and do not fully reflect reassignment effects.
+
+Evidence:
+- src/lib/demoExperience.tsx
+- src/lib/actionExecution.ts
+- src/components/recruitment/TeamPage.tsx
+
+## Localization validation
+
+Status:
+- Functional EN/FR coverage: good
+- Portfolio-grade language consistency: partial
+
+Main localization defects:
+- mixed owner terminology in French contexts
+- scattered English nouns inside FR decision copy
+
+## Public demo stability validation
+
+Build gate:
+- npm run build: PASS
+- No compile/type blocking errors
+- Existing non-blocking ESLint flat-config warning remains unchanged
+
+Stability posture:
+- No code-level blocker found for hydration, routing, guided-demo transitions, or action modal lifecycle in current audited implementation.
+
+## Responsive / UX validation
+
+From CSS/system review:
+- Desktop/tablet/mobile breakpoints are defined for key shells and overlays.
+- Guided narration bubble and action modal have mobile fallbacks.
+
+Residual risk:
+- no recorded screenshot matrix attached in this QA pass.
+
+## Portfolio value scoring (/10)
+
+- Product Thinking: 9.1
+- Business Understanding: 8.9
+- Product Strategy: 8.8
+- UX Reasoning: 8.6
+- AI Product Design: 8.7
+- Technical Architecture: 8.8
+- AI-assisted Development: 8.7
+- QA / Iteration Discipline: 8.6
+- Demo Quality: 8.7
+- Storytelling: 8.9
+- Portfolio Impact: 9.0
+- Hiring Impact: 8.9
+
+## Final hiring verdict (Product Director lens)
+
+Would I interview this candidate?
+- YES
+
+Strongest evidence:
+- End-to-end product narrative clarity
+- Deterministic action transparency architecture
+- Cross-screen state discipline
+- Strong blend of product reasoning and implementation detail
+
+Biggest concern:
+- Last-mile polish inconsistencies (language coherence and workload credibility signal)
+
+Seniority signal:
+- Strong Product Builder / Senior Product Manager with technical depth
+- Relevant for AI Product Manager and Solutions/Product Consultant tracks
+
+What would make the profile even stronger:
+- publish one final polish pass proving enterprise-grade bilingual polish and post-action workload realism
+
+## Final output summary
+
+1. Executive QA summary: Strong portfolio-ready product with minor polish gaps.
+2. Critical issues: None.
+3. High issues: Localization inconsistency, workload credibility after reassignment, Copilot "Live" wording risk.
+4. Medium issues: disabled mode framing, focus trap completeness, no automated interaction artifact in this pass.
+5. Nice-to-have improvements: microcopy and credibility polish.
+6. Guided Demo score /10: 9.0
+7. Dashboard score /10: 8.8
+8. Action Engine score /10: 8.9
+9. Copilot score /10: 8.4
+10. Overall demo-readiness score /10: 8.8
+11. Portfolio impact score /10: 9.0
+12. Hiring-impact score /10: 8.9
+13. Release recommendation: READY WITH MINOR FIXES
+14. Final Product Director verdict: INTERVIEW
+15. Only fixes required before public portfolio launch:
+    - finalize FR terminology consistency in high-impact action/dashboard surfaces
+    - ensure reassignment visibly reflects workload impact in Team experience
+    - remove ambiguity between "Live" badge and simulated Copilot mode
+16. Fixes that should NOT block launch:
+    - explanatory microcopy for disabled future briefing modes
+    - stricter modal focus trap enhancements
+    - screenshot matrix automation for QA evidence
+17. Recommendation for portfolio / LinkedIn / Malt packaging:
+    - Position TalentFlow as a deterministic AI-assisted decision-support demo demonstrating full Product Builder lifecycle (problem framing -> strategy -> architecture -> implementation -> QA iteration).
+
+## Sprint close
+
+Sprint Goal achieved:
+- YES
+
+Business Value:
+- 9.0/10
+
+Product Quality:
+- 8.8/10
+
+Technical Quality:
+- 8.8/10
+
+UX Quality:
+- 8.6/10
+
+Portfolio Value:
+- 9.0/10
+
+Ready for portfolio launch:
+- YES
 
 All agents must use this file as shared project context.
 

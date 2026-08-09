@@ -61,8 +61,8 @@ export function TopHeader({
           onClick={replayGuidedDemo}
         >
           {state.guidedDemo.running
-            ? (language === "en" ? "Restart guided demo" : "Redemarrer la demo guidee")
-            : (language === "en" ? "Replay guided demo" : "Rejouer la demo guidee")}
+            ? (language === "en" ? "Restart guided demo" : "Redémarrer la démo guidée")
+            : (language === "en" ? "Replay guided demo" : "Rejouer la démo guidée")}
         </button>
         <button
           type="button"

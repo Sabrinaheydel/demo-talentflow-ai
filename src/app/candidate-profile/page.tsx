@@ -83,7 +83,7 @@ const activity = [
 export default function CandidateProfilePage() {
   const mayaCandidate = getCanonicalCandidateById("maya-chen");
   const [language, setLanguage] = useState<"en" | "fr">("en");
-  const { state, openActionIntent, requestFeedback, scheduleInterview, completeInterview } = useDemoExperience();
+  const { state, openActionIntent } = useDemoExperience();
   const uiCopy = translations[language];
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -227,14 +227,12 @@ export default function CandidateProfilePage() {
               type="button"
               className="btn btn--primary"
               onClick={() => {
-                scheduleInterview("maya-chen");
-                setModal({
-                  title: copy.profileAction,
-                  description: language === "en"
-                    ? "This demo action opens the scheduling workflow for the next interview conversation."
-                    : "Cette action de démonstration ouvre le flux de planification pour la prochaine conversation d’entretien.",
-                  confirmLabel: language === "en" ? "Schedule" : "Planifier",
-                  message: language === "en" ? "Interview scheduling opened" : "Planification d’entretien ouverte",
+                openActionIntent({
+                  actionId: "schedule-candidate-interview",
+                  language,
+                  candidateId: "maya-chen",
+                  owner: state.candidates["maya-chen"]?.assignedRecruiter ?? "Sarah Martin",
+                  interviewLabel: language === "en" ? "Today 10:30" : "Aujourd'hui 10:30",
                 });
               }}
             >
@@ -401,8 +399,31 @@ export default function CandidateProfilePage() {
                 >
                   {state.candidates["maya-chen"]?.prepared ? (language === "en" ? "Prepared" : "Prepare") : (language === "en" ? "Mark as prepared" : "Marquer comme prepare")}
                 </button>
-                <button type="button" className="btn btn--secondary" onClick={() => requestFeedback("maya-chen")}>{state.candidates["maya-chen"]?.feedbackRequested ? (language === "en" ? "Feedback requested" : "Feedback demandé") : (language === "en" ? "Request feedback" : "Demander un feedback")}</button>
-                <button type="button" className="btn btn--primary" onClick={() => completeInterview("maya-chen")}>{language === "en" ? "Complete interview" : "Terminer l’entretien"}</button>
+                <button
+                  type="button"
+                  className="btn btn--secondary"
+                  onClick={() => openActionIntent({
+                    actionId: "request-candidate-feedback",
+                    language,
+                    candidateId: "maya-chen",
+                    owner: state.candidates["maya-chen"]?.assignedRecruiter ?? "Sarah Martin",
+                    recipient: "Hiring Manager",
+                  })}
+                >
+                  {state.candidates["maya-chen"]?.feedbackRequested ? (language === "en" ? "Feedback requested" : "Feedback demande") : (language === "en" ? "Request feedback" : "Demander un feedback")}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  onClick={() => openActionIntent({
+                    actionId: "complete-candidate-interview",
+                    language,
+                    candidateId: "maya-chen",
+                    owner: state.candidates["maya-chen"]?.assignedRecruiter ?? "Sarah Martin",
+                  })}
+                >
+                  {language === "en" ? "Complete interview" : "Terminer l'entretien"}
+                </button>
               </div>
 
               <div className="detail-card" style={{ marginBottom: "12px" }}>

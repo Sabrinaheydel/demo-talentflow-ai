@@ -109,15 +109,15 @@ export default function Home() {
             </Card>
 
             <Card
-              title={language === "en" ? "AI decision insights" : "Insights IA de decision"}
-              description={language === "en" ? "Signal, impact, urgency and owner" : "Signal, impact, urgence et owner"}
+              title={language === "en" ? "AI decision insights" : "Insights IA de décision"}
+              description={language === "en" ? "Signal, impact, urgency and owner" : "Signal, impact, urgence et responsable"}
             >
               <InsightsPanel language={language} insights={briefingPacket.insights} />
             </Card>
 
             <Card
               title={language === "en" ? "Priority actions" : "Actions prioritaires"}
-              description={language === "en" ? "Explicit actions with owner, urgency and impact" : "Actions explicites avec owner, urgence et impact"}
+              description={language === "en" ? "Explicit actions with owner, urgency and impact" : "Actions explicites avec responsable, urgence et impact"}
             >
               <PriorityActions language={language} actions={briefingPacket.recommendedActions} />
             </Card>

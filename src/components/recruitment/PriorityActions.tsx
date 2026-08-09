@@ -38,7 +38,7 @@ export function PriorityActions({ language, actions }: PriorityActionsProps) {
                     : action.impact}
               </p>
               <p className="priority-item__owner">
-                {language === "en" ? "Owner" : "Owner"}: {action.owner}
+                {language === "en" ? "Owner" : "Responsable"}: {action.owner}
               </p>
               <span className={`badge ${action.urgency === "high" ? "badge--danger" : action.urgency === "medium" ? "badge--warning" : "badge--success"}`}>
                 {action.urgency === "high"
@@ -62,13 +62,61 @@ export function PriorityActions({ language, actions }: PriorityActionsProps) {
                   return;
                 }
 
+                if (action.id === "action-lucas-review") {
+                  openActionIntent({
+                    actionId: "request-candidate-feedback",
+                    language,
+                    candidateId: "lucas-martin",
+                    owner: state.candidates["lucas-martin"]?.assignedRecruiter ?? "Thomas Lee",
+                    recipient: "Thomas Lee",
+                  });
+                  return;
+                }
+
+                if (action.id === "action-noah-interview") {
+                  openActionIntent({
+                    actionId: "mark-candidate-prepared",
+                    language,
+                    candidateId: "noah-williams",
+                    owner: state.candidates["noah-williams"]?.assignedRecruiter ?? "David Klein",
+                    interviewLabel: language === "en" ? "Tomorrow 16:00" : "Demain 16:00",
+                  });
+                  return;
+                }
+
+                if (action.id === "cover-emma-feedback") {
+                  openActionIntent({
+                    actionId: "request-emma-feedback",
+                    language,
+                    owner: state.candidates["emma-laurent"]?.assignedRecruiter ?? "Sarah Martin",
+                    recipient: "David Klein",
+                  });
+                  return;
+                }
+
+                if (action.id === "cover-maya-offer") {
+                  openActionIntent({ actionId: "validate-maya-salary", language });
+                  return;
+                }
+
+                if (action.id === "cover-lucas-feedback") {
+                  openActionIntent({
+                    actionId: "request-candidate-feedback",
+                    language,
+                    candidateId: "lucas-martin",
+                    owner: state.candidates["lucas-martin"]?.assignedRecruiter ?? "Thomas Lee",
+                    recipient: "Thomas Lee",
+                  });
+                  return;
+                }
+
                 addStoryStep(action.confirmMessage);
                 setToast(action.confirmMessage);
               }}
             >
               {(action.id === "action-maya-offer" && mayaSalaryDone) || (action.id === "action-emma-feedback" && emmaFeedbackDone)
                 ? (language === "en" ? "Completed" : "Termine")
-                : language === "en" ? "Run action" : "Executer"}
+                : language === "en" ? "Run action" : "Executer l'action"}
             </button>
             </div>
         ))}

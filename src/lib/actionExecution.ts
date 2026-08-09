@@ -9,7 +9,10 @@ export type ActionId =
   | "validate-maya-salary"
   | "request-emma-feedback"
   | "reassign-candidate"
-  | "mark-candidate-prepared";
+  | "mark-candidate-prepared"
+  | "request-candidate-feedback"
+  | "schedule-candidate-interview"
+  | "complete-candidate-interview";
 
 export type ActionScreen = "dashboard" | "pipeline" | "candidate-profile" | "interviews" | "team" | "copilot";
 
@@ -446,6 +449,191 @@ function buildPreparedDefinition(intent: ActionIntent, language: ExecutionLangua
   };
 }
 
+function buildRequestFeedbackDefinition(intent: ActionIntent, language: ExecutionLanguage, state: EngineState): ActionDefinition {
+  const candidateId = getCandidateIdForIntent(intent);
+  const candidateName = candidateId === "emma-laurent" ? "Emma Laurent" : candidateId === "noah-williams" ? "Noah Williams" : candidateId === "lucas-martin" ? "Lucas Martin" : "Maya Chen";
+  const owner = intent.owner ?? resolveRecruiterName(candidateId, state);
+  const recipient = intent.recipient ?? (candidateId === "lucas-martin" ? "Thomas Lee" : candidateId === "noah-williams" ? "David Klein" : "Hiring Manager");
+  const current = state.candidates[candidateId];
+  const deadline = language === "en" ? "Today 15:00" : "Aujourd'hui 15:00";
+
+  return {
+    id: "request-candidate-feedback",
+    title: language === "en" ? "Request interview feedback" : "Demander un feedback d'entretien",
+    description: language === "en"
+      ? "Request deterministic feedback follow-up to unblock decision flow."
+      : "Demander une relance de feedback deterministe pour debloquer le flux de decision.",
+    target: candidateName,
+    targetId: candidateId,
+    owner,
+    recipient,
+    channel: "email",
+    riskLevel: candidateId === "lucas-martin" ? "high" : "medium",
+    confirmationLevel: "full",
+    messagePreview: {
+      recipient: `${recipient.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+      channel: "email",
+      sender: owner,
+      subject: language === "en"
+        ? `Feedback request - ${candidateName}`
+        : `Demande de feedback - ${candidateName}`,
+      body: language === "en"
+        ? [
+            `Hi ${recipient},`,
+            `Please share your final feedback for ${candidateName} before ${deadline}.`,
+            "This review is required to close the interview decision packet.",
+            "Thanks,",
+            `${owner} - Talent Acquisition`,
+          ]
+        : [
+            `Bonjour ${recipient},`,
+            `Merci de partager votre feedback final pour ${candidateName} avant ${deadline}.`,
+            "Ce retour est requis pour finaliser le dossier de decision d'entretien.",
+            "Merci,",
+            `${owner} - Talent Acquisition`,
+          ],
+    },
+    stateTransitions: [
+      {
+        label: language === "en" ? "Feedback request" : "Demande de feedback",
+        before: current?.feedbackRequested ? (language === "en" ? "Already sent" : "Deja envoyee") : (language === "en" ? "Not sent" : "Non envoyee"),
+        after: language === "en" ? "Sent" : "Envoyee",
+      },
+      {
+        label: language === "en" ? "Feedback status" : "Statut feedback",
+        before: current?.feedbackState === "requested"
+          ? (language === "en" ? "Requested" : "Demande")
+          : current?.feedbackState === "complete"
+            ? (language === "en" ? "Complete" : "Termine")
+            : (language === "en" ? "Missing" : "Manquant"),
+        after: language === "en" ? `Requested - due ${deadline}` : `Demande - echeance ${deadline}`,
+      },
+    ],
+    affectedScreens: ["dashboard", "interviews", "candidate-profile", "team"],
+    kpiChanges: language === "en"
+      ? ["Feedback queue updated"]
+      : ["File de feedback mise a jour"],
+    priorityChanges: language === "en"
+      ? ["Decision blocker tracking refreshed"]
+      : ["Suivi des bloqueurs de decision actualise"],
+    expectedImpact: language === "en"
+      ? ["Prevents decision delay", "Keeps interview loop predictable"]
+      : ["Evite les retards de decision", "Maintient une boucle d'entretien previsible"],
+    recommendedNextAction: language === "en" ? "Review feedback status at 16:00" : "Revoir le statut des feedbacks a 16:00",
+    status: "previewed",
+  };
+}
+
+function buildScheduleInterviewDefinition(intent: ActionIntent, language: ExecutionLanguage, state: EngineState): ActionDefinition {
+  const candidateId = getCandidateIdForIntent(intent);
+  const candidateName = candidateId === "emma-laurent" ? "Emma Laurent" : candidateId === "noah-williams" ? "Noah Williams" : candidateId === "lucas-martin" ? "Lucas Martin" : "Maya Chen";
+  const current = state.candidates[candidateId];
+  const owner = intent.owner ?? resolveRecruiterName(candidateId, state);
+  const interviewSlot = intent.interviewLabel ?? (language === "en" ? "Next available slot" : "Prochain creneau disponible");
+
+  return {
+    id: "schedule-candidate-interview",
+    title: language === "en" ? "Schedule candidate interview" : "Planifier un entretien candidat",
+    description: language === "en"
+      ? "Confirm interview scheduling with deterministic updates across TalentFlow."
+      : "Confirmer la planification d'entretien avec des mises a jour deterministes dans TalentFlow.",
+    target: candidateName,
+    targetId: candidateId,
+    owner,
+    recipient: candidateName,
+    channel: "workflow",
+    riskLevel: "medium",
+    confirmationLevel: "lightweight",
+    messagePreview: {
+      recipient: `${candidateName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+      channel: "workflow",
+      sender: owner,
+      subject: language === "en"
+        ? `Interview scheduling confirmation - ${candidateName}`
+        : `Confirmation de planification d'entretien - ${candidateName}`,
+      body: language === "en"
+        ? [
+            `Interview slot proposed for ${candidateName}: ${interviewSlot}.`,
+            "The recruiting team has synchronized preparation and follow-up steps.",
+          ]
+        : [
+            `Creneau d'entretien propose pour ${candidateName} : ${interviewSlot}.`,
+            "L'equipe recrutement a synchronise la preparation et les etapes de suivi.",
+          ],
+    },
+    stateTransitions: [
+      {
+        label: language === "en" ? "Interview scheduling" : "Planification entretien",
+        before: current?.scheduled ? (language === "en" ? "Scheduled" : "Planifie") : (language === "en" ? "Not scheduled" : "Non planifie"),
+        after: language === "en" ? "Scheduled" : "Planifie",
+      },
+      {
+        label: language === "en" ? "Preparation state" : "Etat preparation",
+        before: current?.prepared ? (language === "en" ? "Prepared" : "Prepare") : (language === "en" ? "Not prepared" : "Non prepare"),
+        after: language === "en" ? "Prepared" : "Prepare",
+      },
+    ],
+    affectedScreens: ["interviews", "candidate-profile", "dashboard"],
+    kpiChanges: language === "en"
+      ? ["Upcoming interview queue updated"]
+      : ["File des entretiens a venir mise a jour"],
+    priorityChanges: language === "en"
+      ? ["Interview readiness increased"]
+      : ["Preparation entretien amelioree"],
+    expectedImpact: language === "en"
+      ? ["Locks interview timeline", "Improves panel coordination"]
+      : ["Verrouille le calendrier d'entretien", "Ameliore la coordination du panel"],
+    recommendedNextAction: language === "en" ? "Open interview guide" : "Ouvrir le guide d'entretien",
+    status: "previewed",
+  };
+}
+
+function buildCompleteInterviewDefinition(intent: ActionIntent, language: ExecutionLanguage, state: EngineState): ActionDefinition {
+  const candidateId = getCandidateIdForIntent(intent);
+  const candidateName = candidateId === "emma-laurent" ? "Emma Laurent" : candidateId === "noah-williams" ? "Noah Williams" : candidateId === "lucas-martin" ? "Lucas Martin" : "Maya Chen";
+  const current = state.candidates[candidateId];
+  const owner = intent.owner ?? resolveRecruiterName(candidateId, state);
+
+  return {
+    id: "complete-candidate-interview",
+    title: language === "en" ? "Complete interview review" : "Finaliser la revue d'entretien",
+    description: language === "en"
+      ? "Close interview execution and synchronize decision-readiness signals."
+      : "Cloturer l'execution d'entretien et synchroniser les signaux de preparation de decision.",
+    target: candidateName,
+    targetId: candidateId,
+    owner,
+    recipient: owner,
+    channel: "inApp",
+    riskLevel: "medium",
+    confirmationLevel: "lightweight",
+    stateTransitions: [
+      {
+        label: language === "en" ? "Interview status" : "Statut entretien",
+        before: current?.completed ? (language === "en" ? "Completed" : "Termine") : (language === "en" ? "In progress" : "En cours"),
+        after: language === "en" ? "Completed" : "Termine",
+      },
+      {
+        label: language === "en" ? "Feedback request" : "Demande de feedback",
+        before: current?.feedbackRequested ? (language === "en" ? "Requested" : "Demandee") : (language === "en" ? "Not requested" : "Non demandee"),
+        after: language === "en" ? "Requested" : "Demandee",
+      },
+    ],
+    affectedScreens: ["interviews", "dashboard", "copilot"],
+    kpiChanges: language === "en"
+      ? ["Completed interviews tracker updated"]
+      : ["Suivi des entretiens termines mis a jour"],
+    priorityChanges: language === "en"
+      ? ["Decision packet readiness improved"]
+      : ["Preparation du dossier de decision amelioree"],
+    expectedImpact: language === "en"
+      ? ["Improves decision cadence", "Enables structured follow-up"]
+      : ["Ameliore la cadence de decision", "Permet un suivi structure"],
+    recommendedNextAction: language === "en" ? "Ask Copilot for follow-up plan" : "Demander au Copilot un plan de suivi",
+    status: "previewed",
+  };
+}
+
 export function buildActionDefinition(intent: ActionIntent, state: EngineState): ActionDefinition | null {
   if (intent.actionId === "validate-maya-salary") {
     return buildSalaryDefinition(intent.language, state);
@@ -458,6 +646,15 @@ export function buildActionDefinition(intent: ActionIntent, state: EngineState):
   }
   if (intent.actionId === "mark-candidate-prepared") {
     return buildPreparedDefinition(intent, intent.language, state);
+  }
+  if (intent.actionId === "request-candidate-feedback") {
+    return buildRequestFeedbackDefinition(intent, intent.language, state);
+  }
+  if (intent.actionId === "schedule-candidate-interview") {
+    return buildScheduleInterviewDefinition(intent, intent.language, state);
+  }
+  if (intent.actionId === "complete-candidate-interview") {
+    return buildCompleteInterviewDefinition(intent, intent.language, state);
   }
   return null;
 }
@@ -483,7 +680,7 @@ export function buildActionPreview(definition: ActionDefinition, language: Execu
 }
 
 function buildCompletedItems(definition: ActionDefinition, language: ExecutionLanguage): string[] {
-  const notifiedLabel = language === "en" ? "Message sent to" : "Message envoye a";
+  const notifiedLabel = language === "en" ? "Demo mode - simulated execution to" : "Mode demo - execution simulee vers";
   const channelLabel = mapChannelLabel(definition.channel, language);
   const firstLine = definition.messagePreview
     ? `${notifiedLabel} ${definition.recipient} (${channelLabel})`
@@ -536,6 +733,33 @@ export function executeActionTransition(
     candidateUpdates[target] = {
       prepared: true,
       scheduled: true,
+      lastUpdatedAt: timestamp,
+    };
+  }
+
+  if (definition.id === "request-candidate-feedback") {
+    candidateUpdates[target] = {
+      feedbackRequested: true,
+      feedbackState: "requested",
+      finalFeedbackDeadline: language === "en" ? "Today 15:00" : "Aujourd'hui 15:00",
+      lastUpdatedAt: timestamp,
+    };
+  }
+
+  if (definition.id === "schedule-candidate-interview") {
+    candidateUpdates[target] = {
+      scheduled: true,
+      prepared: true,
+      lastUpdatedAt: timestamp,
+    };
+  }
+
+  if (definition.id === "complete-candidate-interview") {
+    candidateUpdates[target] = {
+      completed: true,
+      scheduled: true,
+      feedbackRequested: true,
+      feedbackState: "requested",
       lastUpdatedAt: timestamp,
     };
   }
