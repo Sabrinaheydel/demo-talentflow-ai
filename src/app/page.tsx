@@ -10,14 +10,23 @@ import { RecentCandidatesTable } from "../components/dashboard/RecentCandidatesT
 import { UpcomingInterviews } from "../components/dashboard/UpcomingInterviews";
 import { InsightsPanel } from "../components/recruitment/InsightsPanel";
 import { PriorityActions } from "../components/recruitment/PriorityActions";
-import Link from "next/link";
-import { translations } from "../lib/i18n";
+import { ExecutiveBriefing } from "../components/dashboard/ExecutiveBriefing";
+import { buildBriefingPacket } from "../lib/dashboardBriefing";
 import { useDemoExperience } from "../lib/demoExperience";
 
 export default function Home() {
   const [language, setLanguage] = useState<"en" | "fr">("en");
   const [hydrated, setHydrated] = useState(false);
-  const { state } = useDemoExperience();
+  const {
+    state,
+    addStoryStep,
+    setActiveBriefingType,
+    setCoverMode,
+    completeCatchUp,
+    setDashboardBriefingMeta,
+  } = useDemoExperience();
+
+  const briefingPacket = buildBriefingPacket(state.dashboard.activeBriefingType, state, language);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("talentflow-language");
@@ -32,6 +41,23 @@ export default function Home() {
     window.localStorage.setItem("talentflow-language", language);
   }, [hydrated, language]);
 
+  useEffect(() => {
+    setDashboardBriefingMeta({
+      briefingType: briefingPacket.briefingType,
+      title: briefingPacket.title,
+      prioritySelection: briefingPacket.priorityOne.id,
+      estimatedCatchUpMinutes: briefingPacket.estimatedCatchUpMinutes,
+      scenarioId: briefingPacket.scenarioId,
+    });
+  }, [
+    briefingPacket.briefingType,
+    briefingPacket.estimatedCatchUpMinutes,
+    briefingPacket.priorityOne.id,
+    briefingPacket.scenarioId,
+    briefingPacket.title,
+    setDashboardBriefingMeta,
+  ]);
+
   return (
     <div className="app-shell">
       <Sidebar language={language} activeItem="dashboard" />
@@ -44,55 +70,21 @@ export default function Home() {
         />
 
         <main className="main-content">
-          <section className="hero-panel">
-            <div className="hero-panel__content">
-              <p className="eyebrow">
-                {language === "en" ? "AI hiring command center" : "Centre de commande RH IA"}
-              </p>
-              <h2>
-                {language === "en"
-                  ? "Good morning, Sabrina"
-                  : "Bonjour, Sabrina"}
-              </h2>
-              <p className="hero-panel__text">
-                {language === "en"
-                  ? "You are pacing ahead of plan with a strong shortlist and faster time-to-offer."
-                  : "Vous êtes en avance sur le plan avec une shortlist solide et un délai d’offre plus rapide."}
-              </p>
-              <p className="demo-disclaimer">
-                {language === "en"
-                  ? "Demo note: candidate data and AI outputs are simulated for product presentation."
-                  : "Note de démo : les données candidats et les sorties IA sont simulées pour la présentation du produit."}
-              </p>
-              <div className="candidate-summary__chips" style={{ marginTop: "14px" }}>
-                <span className="demo-pill">{translations[language].demoLabel}</span>
-                {state.lastAction ? <span className="demo-pill">{state.lastAction}</span> : null}
-                <Link href="/candidate-profile" className="btn btn--primary">
-                  {language === "en" ? "Open AI candidate profile" : "Ouvrir le profil IA du candidat"}
-                </Link>
-              </div>
-            </div>
-            <div className="hero-metrics">
-              <div className="metric-pill">
-                <span>{language === "en" ? "AI Confidence Score" : "Score de confiance IA"}</span>
-                <strong>94%</strong>
-              </div>
-              <div className="metric-pill">
-                <span>{language === "en" ? "Hiring Velocity" : "Vitesse d’embauche"}</span>
-                <strong>+18%</strong>
-              </div>
-              <div className="metric-pill">
-                <span>{language === "en" ? "Weekly Performance" : "Performance hebdo"}</span>
-                <strong>7.2x</strong>
-              </div>
-              <div className="metric-pill">
-                <span>{language === "en" ? "Last sync" : "Dernière sync"}</span>
-                <strong>2 min ago</strong>
-              </div>
-            </div>
-          </section>
+          <ExecutiveBriefing
+            language={language}
+            packet={briefingPacket}
+            activeBriefingType={state.dashboard.activeBriefingType}
+            onBriefingTypeChange={(nextType) => {
+              setActiveBriefingType(nextType);
+              setCoverMode(nextType === "cover");
+            }}
+            onPrimaryAction={() => {
+              completeCatchUp();
+              addStoryStep(language === "en" ? "Executive catch-up launched" : "Rattrapage executif demarre");
+            }}
+          />
 
-          <StatsGrid language={language} />
+          <StatsGrid language={language} kpis={briefingPacket.kpis} />
 
           <div className="content-grid">
             <Card
@@ -117,17 +109,17 @@ export default function Home() {
             </Card>
 
             <Card
-              title={language === "en" ? "AI insights" : "Résultats IA"}
-              description={language === "en" ? "Live hiring intelligence" : "Intelligence de recrutement en direct"}
+              title={language === "en" ? "AI decision insights" : "Insights IA de decision"}
+              description={language === "en" ? "Signal, impact, urgency and owner" : "Signal, impact, urgence et owner"}
             >
-              <InsightsPanel language={language} />
+              <InsightsPanel language={language} insights={briefingPacket.insights} />
             </Card>
 
             <Card
               title={language === "en" ? "Priority actions" : "Actions prioritaires"}
-              description={language === "en" ? "The work that needs attention now" : "Les tâches qui demandent une attention immédiate"}
+              description={language === "en" ? "Explicit actions with owner, urgency and impact" : "Actions explicites avec owner, urgence et impact"}
             >
-              <PriorityActions language={language} />
+              <PriorityActions language={language} actions={briefingPacket.recommendedActions} />
             </Card>
           </div>
         </main>

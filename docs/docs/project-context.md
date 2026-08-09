@@ -131,6 +131,165 @@ Current gaps to close before public launch:
 - Some interactions still feel static and should better reflect real recruiter behavior
 - Copilot output should feel more concrete and decision-oriented for recruiter use
 
+## 5.1 Dashboard Product Intelligence Sprint
+
+Sprint goal:
+
+Transform the Dashboard into an AI-powered executive briefing that lets a recruiter or temporary cover understand what changed, what is at risk, and what to do first in under 30 seconds.
+
+1. Current Dashboard problems
+
+- The hero is friendly but generic and does not summarize recent operational change.
+- KPI tiles are mostly static totals and trends with limited decision value.
+- Insights and actions are useful in intent but not explicit enough on urgency, owner and deadline.
+- The page requires scanning multiple cards before a user can identify the top priority.
+
+2. User / job-to-be-done
+
+- As a returning recruiter, replacement recruiter or manager cover, I need an instant operational briefing so I can resume control and make the next correct decision without reconstructing activity manually.
+
+3. Revised Dashboard information hierarchy
+
+- Layer 1: Executive Briefing (since last visit summary + one recommended priority).
+- Layer 2: Decision KPI strip (state of flow, blocked work, pending decisions, workload shifts).
+- Layer 3: Critical changes and risks (candidate stage movements, pending feedback, offers at risk, interviews completed).
+- Layer 4: Action queue (explicit next best actions with owner and due time).
+- Layer 5: Supporting analytics (funnel and broader performance context).
+
+4. Hero / Executive Briefing concept
+
+- Keep the human greeting as a secondary line, not the primary message.
+- Primary hero title should communicate change, for example: "Since your last visit: 5 important changes".
+- Hero body should include:
+   - what happened
+   - what changed materially
+   - what matters now
+   - one clear recommended first action
+- Add timestamp context for absence catch-up (for example: "Last active: 3 days ago").
+
+5. KPI strategy
+
+Replace static vanity metrics with decision KPIs:
+
+- Active candidates in decision window
+- Candidates moved stage since last visit
+- Pending feedback older than 24h
+- Offers at risk (deadline or confidence drop)
+- Interviews completed awaiting decision
+- Recruiter workload change (overloaded vs balanced)
+
+Each KPI must include:
+
+- current value
+- delta versus last visit or last 7 days
+- short implication label (On track, Watch, At risk)
+
+6. AI insight strategy
+
+Each insight card must answer:
+
+- what happened
+- why it matters
+- urgency level
+- recommended action
+
+Insight format:
+
+- Signal
+- Impact
+- Urgency
+- Recommended action
+- Suggested owner
+
+7. Priority action strategy
+
+- Replace vague actions (Review, Open) with explicit decisions.
+- Every action should start with a verb and include outcome framing.
+- Example structure: "Decide on Maya Chen offer before Thursday 17:00".
+- Show expected impact and due time for each action.
+
+8. Returning-user / absence briefing concept
+
+- Trigger absence mode after configurable inactivity (for demo: 48h+).
+- Show compact catch-up briefing with:
+   - top changes since last visit
+   - new blockers
+   - new risks
+   - actions completed by teammates
+   - outstanding decisions
+- Provide a one-click "Start catch-up" flow that guides users through top 3 priorities.
+- Allow "cover mode" for managers or teammates taking over temporarily.
+
+9. What to keep
+
+- Clear card-based visual structure.
+- Existing sections that support operational context: funnel, interviews, recent candidates.
+- Human greeting tone and demo disclosure.
+
+10. What to remove
+
+- Hero metrics that do not drive decisions (for example weekly performance multipliers without clear action implications).
+- Generic insight phrasing that lacks urgency and owner.
+- Any priority button that does not describe a specific operational decision.
+
+11. What to add
+
+- Since-last-visit timeline summary.
+- Critical change feed (stage changes, completed interviews, offer updates).
+- Risk queue (blocked candidates, overdue feedback, at-risk offers).
+- Workload change monitor by recruiter.
+- Single recommended priority with rationale.
+
+12. MVP scope
+
+Must Have:
+
+- Executive Briefing hero with since-last-visit summary
+- Decision-oriented KPI strip
+- Actionable AI insights with urgency and recommendation
+- Explicit priority action list with deadlines and owner context
+- Absence catch-up mode for returning users
+
+Should Have:
+
+- Cover mode for temporary takeover
+- Personalization by recruiter role context
+
+Could Have:
+
+- Natural-language drill-down from each insight
+- Weekly narrative digest view
+
+13. Out of scope
+
+- Real-time external ATS synchronization
+- Predictive model retraining workflows
+- New backend architecture or infra changes
+- Non-dashboard module redesign during this sprint
+
+14. Acceptance criteria
+
+- A returning recruiter can state the top priority in under 30 seconds.
+- The dashboard clearly shows what changed since last visit.
+- At least one critical risk and one blocker are explicitly surfaced when present.
+- Priority actions are explicit, time-bound and decision-oriented.
+- Catch-up mode supports both original owner and temporary cover user.
+
+15. Definition of Done for this sprint
+
+- Dashboard no longer reads as static analytics; it behaves as a decision-support briefing.
+- Hero, KPIs, insights and actions are coherent around "what changed" and "what to do next".
+- Keep/change/remove/add decisions are reflected in the page information hierarchy.
+- Demo data remains deterministic, coherent and bilingual (EN/FR).
+- The experience is understandable by a first-time or returning recruiter without verbal guidance.
+
+Decision log (Dashboard positioning):
+
+- Previous decision: Dashboard positioned primarily as a visual analytics overview.
+- New decision: Dashboard positioned as an executive operational briefing and next-action surface.
+- Reason: Recruiters returning after absence need situational awareness and immediate decision clarity, not static reporting.
+- Impact: Hero, KPIs, insight cards and action design now prioritize change detection, risk signaling and clear first action.
+
 ---
 
 # 6. Product Principles
@@ -447,6 +606,310 @@ The architecture is complete when:
 - deployment is safe, predictable and free from exposed secrets
 - the public demo can be understood and explored without technical support
 
+## 9.15 Dashboard Executive Briefing Architecture
+
+This section translates the approved Dashboard Product Intelligence vision into implementation architecture while preserving demo constraints:
+
+- deterministic behavior
+- demo-safe execution
+- bilingual EN/FR
+- fully local simulation
+- no additional backend dependency
+- strict coherence with shared demo dataset
+
+### 1. Recommended architecture
+
+Recommended composition for Dashboard:
+
+- Dashboard presentation layer with three explicit briefing layers:
+   - WHAT CHANGED
+   - WHAT NEEDS ATTENTION
+   - WHAT TO DO NOW
+- A reusable Briefing Engine that builds all briefing modes from one shared contract and one rendering system.
+- A local dashboard-intelligence derivation layer that computes briefing artifacts from canonical demo data and demo state.
+- A deterministic scenario layer (absence, normal return, cover mode) used to simulate "since last visit" without external events.
+- Reuse existing shared state and reset orchestration; no new backend service.
+
+Briefing Engine target modes:
+
+- Absence Brief
+- Morning Brief
+- Weekly Brief
+- Cover Brief
+- End-of-Day Brief (future)
+
+MVP implementation scope for this sprint:
+
+- Fully implement Absence Brief (Since your last visit)
+- Fully implement Cover Brief
+- Prepare architecture contracts for Morning Brief and Weekly Brief without full mode implementation
+
+Single engine rule:
+
+- No duplicated hard-coded briefing components per mode.
+- Each mode varies only by time window, audience context and prioritization profile.
+
+Reusable briefing contract (all modes):
+
+- briefingType
+- title
+- timeWindow
+- summary
+- keyChanges
+- risks
+- priorityOne
+- recommendedActions
+- estimatedCatchUpTime
+- audienceContext
+
+### 2. Shared data-model updates
+
+Extend the canonical shared model with architecture-level entities:
+
+- activityEvents: deterministic event stream (stage changed, interview completed, feedback requested/received, offer updated)
+- decisionItems: explicit decisions with due date, owner, urgency and candidate link
+- riskFlags: structured risk/blocker signals with severity and source
+- recruiterLoadSnapshots: workload snapshots by recruiter for delta comparison
+- visitContext: lastActiveAt, scenarioId, activeActorId, activeMode (owner or cover)
+- briefingTemplates: localized template references by briefingType
+- briefingProfiles: rule presets by briefingType (time window, ranking weights, inclusion thresholds)
+
+All Dashboard signals must be derived from these typed entities, not hard-coded per component.
+
+### 3. Demo-state updates
+
+Add dashboard-specific state slices to the shared demo state:
+
+- dashboard.lastViewedAt
+- dashboard.activeScenarioId
+- dashboard.catchUpCompleted
+- dashboard.coverMode: { enabled, coverActorId, originalOwnerId }
+- dashboard.briefingDismissedSections
+- dashboard.prioritySelection: deterministic ID of Priority #1 recommendation
+- dashboard.estimatedCatchUpMinutes
+- dashboard.activeBriefingType
+- dashboard.briefingPacketsByType
+
+State remains local and deterministic, persisted only through existing demo-state mechanisms.
+
+### 4. "Since your last visit" simulation strategy
+
+Simulation should be rule-based:
+
+- Determine elapsed time from dashboard.lastViewedAt.
+- Select a deterministic scenario pack (for example: 48h absence, 5-day absence, cover takeover).
+- Materialize pre-defined activityEvents in a fixed order.
+- Compute deltas against previous snapshot to produce "what changed" summary.
+
+No randomization and no live clocks beyond relative elapsed-time formatting.
+
+Briefing Engine simulation behavior:
+
+- The engine receives briefingType and audienceContext.
+- The engine resolves briefingProfiles[briefingType].
+- The same derivation pipeline produces one normalized briefing packet.
+- Rendering components consume normalized packet fields only.
+
+This guarantees that adding Morning Brief or Weekly Brief reuses the same data and UI contract.
+
+### 5. Catch-up Mode architecture
+
+Catch-up Mode is a deterministic guided briefing state:
+
+- Entry condition: elapsed inactivity threshold reached (default demo threshold: 48h).
+- Output artifact: compact briefing packet with:
+   - key changes
+   - new risks/blockers
+   - pending decisions
+   - top 3 actions
+- Completion rule: user finishes or dismisses top-priority walkthrough, setting dashboard.catchUpCompleted=true.
+
+Catch-up mode should be re-openable without data drift.
+
+Catch-up mode must internally consume Briefing Engine packets rather than a page-specific hard-coded payload.
+
+### 6. Cover Mode architecture
+
+Cover Mode models temporary ownership substitution:
+
+- User selects cover actor context (manager or teammate).
+- Derived recommendations re-rank by cross-recruiter impact, not just original owner context.
+- Decision items show both original owner and temporary owner fields.
+- Mode is reversible and resettable through shared demo reset.
+
+Cover Mode does not duplicate data; it applies a context lens over the same shared dataset.
+
+Cover Brief must be generated through briefingType="cover" with the same packet contract used by Absence Brief.
+
+### 7. KPI derivation strategy
+
+Decision-oriented KPI values are derived, never manually entered:
+
+- activeDecisionWindow = candidates requiring decision within configured SLA
+- movedSinceLastVisit = count of stage-change events since lastViewedAt
+- pendingFeedbackOver24h = feedback requests without response beyond threshold
+- offersAtRisk = offers with deadline proximity or confidence-drop flag
+- interviewsAwaitingDecision = completed interviews with no decision record
+- workloadDelta = recruiter load variance between snapshots
+
+Each KPI outputs value, delta, and status label (on-track/watch/at-risk).
+
+### 8. AI insight generation strategy (deterministic)
+
+Insights are generated by deterministic templates from event + risk + KPI intersections:
+
+- Input: activityEvents, riskFlags, decisionItems, workload deltas, language
+- Rule engine: rank by severity, deadline proximity, and decision impact
+- Output contract:
+   - signal
+   - whyItMatters
+   - urgency
+   - recommendedAction
+   - suggestedOwner
+
+No probabilistic generation is required for dashboard insight cards in demo mode.
+
+### 9. Priority recommendation strategy
+
+Priority #1 recommendation should be first-class and deterministic.
+
+Ranking formula (deterministic weighted score):
+
+- riskSeverityWeight
+- deadlineProximityWeight
+- candidateStrategicWeight
+- dependencyBlockWeight
+- workloadReliefWeight
+
+Top scored decisionItem becomes prioritySelection, with rationale trace for explainability.
+
+Prioritization profiles by briefing type:
+
+- absence: emphasize accumulated change and unresolved blockers
+- cover: emphasize handoff risk and cross-recruiter workload impact
+- morning (future): emphasize near-term deadlines for the day
+- weekly (future): emphasize strategic milestones and trend risk
+
+### 10. Cross-screen consistency rules
+
+Consistency rules across Dashboard, Pipeline, Candidate Profile, Interviews, Team and Copilot:
+
+- Stage, priority, probability and owner values must resolve from the same canonical entity IDs.
+- Dashboard events must reference candidate IDs already used by other screens.
+- Priority #1 candidate context must match profile/interview/team narratives.
+- Copilot context must consume the same decisionItems and riskFlags.
+- No page may override shared derived values with page-local constants.
+
+### 11. State transitions
+
+Core transition graph:
+
+- Normal mode -> Absence detected -> Catch-up mode active
+- Catch-up mode active -> Catch-up completed
+- Catch-up completed -> Ongoing monitoring mode
+- Any mode -> Cover mode enabled
+- Cover mode enabled -> Cover mode disabled
+- Ongoing monitoring mode -> Morning Brief (future)
+- Ongoing monitoring mode -> Weekly Brief (future)
+- Any mode -> Reset demo baseline
+
+Transitions must be explicit and reversible, with no hidden side effects.
+
+### 12. Demo reset implications
+
+Reset must now additionally restore:
+
+- dashboard.lastViewedAt baseline
+- scenario selection
+- catch-up completion state
+- cover mode state
+- prioritySelection
+- estimatedCatchUpMinutes
+- derived briefing packet cache
+
+Reset output must return the same deterministic first-run briefing every time.
+
+### 13. Localization implications
+
+New architecture copy domains to localize centrally:
+
+- briefing layer headers (WHAT CHANGED / WHAT NEEDS ATTENTION / WHAT TO DO NOW)
+- catch-up and cover mode states
+- urgency labels
+- rationale templates for Priority #1
+- estimated catch-up-time sentence patterns
+- briefing-mode titles and subtitles by briefingType
+- audience-context labels (owner, temporary cover)
+
+All generated strings must use translation keys and shared formatting rules.
+
+### 14. Architecture risks
+
+- Derived-signal drift if event taxonomy is inconsistent across modules.
+- Priority score opacity if ranking rationale is not exposed.
+- Cover mode confusion if owner vs temporary owner labels are ambiguous.
+- Reset regression if dashboard-specific state is not fully included.
+- Localization fragmentation if template strings are embedded in components.
+- Briefing drift if modes are implemented as separate UI components instead of the shared packet renderer.
+
+### 15. Architecture acceptance criteria
+
+- Dashboard can always produce deterministic briefing layers from shared data + state.
+- "Since last visit" summary is reproducible for the same scenario/time window.
+- Catch-up and cover modes can be toggled and reset without inconsistencies.
+- KPI, insight and priority outputs remain coherent with Pipeline/Profile/Interviews/Team/Copilot.
+- EN/FR content for new briefing constructs is fully served from centralized localization.
+- Absence Brief and Cover Brief use the same briefing engine contract and renderer with no duplicated hard-coded briefing component.
+- Morning Brief and Weekly Brief can be added by configuration (briefingProfile + templates) without refactoring the derivation pipeline.
+
+### 16. Architecture Definition of Done (Dashboard sprint)
+
+- Three-layer briefing architecture is implemented as a reusable derived-state contract.
+- Priority #1 recommendation is stored as a first-class derived state artifact with rationale.
+- Estimated catch-up time is computed and persisted as a first-class dashboard state artifact.
+- Demo reset deterministically restores all Dashboard intelligence states.
+- Cross-screen data consistency checks pass for all shared entities referenced by Dashboard.
+- Briefing Engine supports multiple briefing types through one normalized packet schema.
+- Absence Brief and Cover Brief are fully implemented on top of the shared engine.
+- Morning and Weekly briefing architecture paths are defined and integration-ready without refactor.
+
+### First-class concept decision: Estimated catch-up time
+
+Decision: YES, introduce as first-class architecture concept.
+
+Rationale:
+
+- It sets clear user expectation for effort recovery.
+- It improves adoption of catch-up mode by reducing uncertainty.
+
+Integration with shared demo state:
+
+- Compute from deterministic count/weight of unread decisionItems + riskFlags + stage changes.
+- Persist as dashboard.estimatedCatchUpMinutes.
+- Recompute on scenario change, cover-mode toggle and reset.
+
+### First-class concept decision: Priority #1 recommendation
+
+Decision: YES, introduce as first-class architecture concept.
+
+Rationale:
+
+- The dashboard must converge to one clear first decision.
+- It enforces decision-support behavior over static analytics display.
+
+Integration with shared demo state:
+
+- Persist deterministic selected item as dashboard.prioritySelection.
+- Store rationale trace metadata for explainability and bilingual rendering.
+- Expose same selected decision to Copilot and linked screens for narrative consistency.
+
+Decision log (Dashboard architecture):
+
+- Previous decision: Dashboard architecture treated the view primarily as static analytics composition.
+- New decision: Dashboard architecture uses deterministic briefing derivation with first-class catch-up and priority concepts.
+- Reason: Returning and cover users need immediate operational comprehension and one explicit first decision.
+- Impact: Shared model, demo state, reset behavior and localization now include briefing intelligence artifacts.
+
 ---
 
 # 10. Demo Mode
@@ -507,16 +970,18 @@ Avoid:
 
 # 12. Current Roadmap
 
-1. Finalize core cross-page data consistency across dashboard, pipeline, profile, interviews, team and Copilot
-2. Strengthen interview and team workflow clarity
-3. Complete FR/EN localization and remove mixed or incomplete text
-4. Improve buttons, states, transitions and CTA clarity
-5. Make Copilot outputs more recruiter-ready and action-oriented
-6. Add onboarding, Guided Demo and Reset Demo experiences
-7. Run desktop, tablet and mobile QA for the full public demo flow
-8. Prepare public deployment and demo script
-9. Add simulation/API switch architecture for future live AI compatibility
-10. Optionally introduce a live AI API in a later phase
+1. Deliver Dashboard Product Intelligence sprint (Executive Briefing + since-last-visit logic + priority-first actions)
+2. Validate returning-user and temporary-cover catch-up flow end to end
+3. Finalize core cross-page data consistency across dashboard, pipeline, profile, interviews, team and Copilot
+4. Strengthen interview and team workflow clarity
+5. Complete FR/EN localization and remove mixed or incomplete text
+6. Improve buttons, states, transitions and CTA clarity
+7. Make Copilot outputs more recruiter-ready and action-oriented
+8. Add onboarding, Guided Demo and Reset Demo experiences
+9. Run desktop, tablet and mobile QA for the full public demo flow
+10. Prepare public deployment and demo script
+11. Add simulation/API switch architecture for future live AI compatibility
+12. Optionally introduce a live AI API in a later phase
 
 ---
 
@@ -537,6 +1002,73 @@ They should be framed clearly as intentional demo architecture choices, and the 
 ---
 
 # 14. Implementation Status
+
+## Dashboard Executive Briefing sprint
+
+Status:
+- Implemented deterministic Dashboard Intelligence MVP with reusable briefing engine
+
+Files modified:
+- src/app/page.tsx
+- src/app/globals.css
+- src/components/dashboard/ExecutiveBriefing.tsx
+- src/components/dashboard/StatsGrid.tsx
+- src/components/recruitment/InsightsPanel.tsx
+- src/components/recruitment/PriorityActions.tsx
+- src/lib/dashboardBriefing.ts
+- src/lib/demoExperience.tsx
+
+Implementation completed:
+- Implemented a reusable briefing engine contract and renderer path supporting:
+   - Absence Brief (implemented)
+   - Cover Brief (implemented)
+   - Morning Brief (architecture-ready placeholder)
+   - Weekly Brief (architecture-ready placeholder)
+   - End-of-Day Brief (architecture-ready placeholder)
+- Replaced static dashboard hero emphasis with an executive briefing surface focused on:
+   - WHAT CHANGED
+   - WHAT NEEDS ATTENTION
+   - WHAT TO DO NOW
+- Added deterministic briefing packet model including:
+   - title
+   - time window
+   - summary
+   - key changes
+   - risks
+   - priority #1
+   - recommended actions
+   - estimated catch-up time
+   - audience context
+- Added shared demo state fields for Dashboard Intelligence:
+   - dashboard.activeBriefingType
+   - dashboard.estimatedCatchUpMinutes
+   - dashboard.prioritySelection
+   - dashboard.briefingPacketsByType
+   - plus cover/catch-up orchestration metadata
+- Implemented Absence Brief scenario with deterministic catch-up narrative and explicit first action
+- Implemented Cover Brief scenario with adjusted audience/owner context and handoff-oriented prioritization
+- Reframed KPI cards into decision-oriented operational indicators with:
+   - current value
+   - delta
+   - operational meaning
+   - risk status
+   - optional action hint
+- Replaced generic insight cards with deterministic actionable insight structure:
+   - signal
+   - impact
+   - urgency
+   - recommended action
+   - suggested owner
+- Replaced vague CTA patterns in priority actions with explicit action verbs, owner, deadline and impact
+- Preserved fully local deterministic behavior with no paid AI API and no added backend dependency
+
+Build status:
+- Pending validation in this sprint step (run required after implementation)
+
+Current known limitations:
+- Morning Brief and Weekly Brief are intentionally architecture-ready but not fully activated in UI flow
+- End-of-Day Brief remains contract-ready only for a future sprint
+- Candidate profile deep-link context for non-Maya priority items is still limited by current profile route behavior
 
 ## Copilot Product Polish sprint
 
@@ -765,6 +1297,186 @@ Make the Team page more explicitly decision-driven by surfacing overload, missin
 ## Release recommendation
 
 READY WITH MINOR FIXES
+
+---
+
+# 15.2 QA Review — Dashboard Intelligence MVP
+
+## Executive QA Summary
+
+The Dashboard now behaves as a real decision-support surface instead of a static analytics page. A returning recruiter can quickly identify what changed, what is at risk and which action comes first. The Briefing Engine foundation is solid, deterministic and coherent with shared state. The main gaps are localization completeness, cover-mode operational clarity and stronger visual emphasis for Priority #1 on small screens.
+
+## Review verdict by persona
+
+- Returning recruiter after 6 days: Mostly successful. The absence briefing provides immediate context and clear first actions.
+- Recruiting manager in temporary cover: Partially successful. Cover briefing exists and is useful, but actor/context control remains implicit.
+- Product Manager: Strong direction and clear product framing around decision latency and risks.
+- UX reviewer: Good hierarchy and reduced greeting dominance; Priority #1 prominence can be stronger on compact layouts.
+- Product Builder recruiter evaluator: Strong portfolio signal for product thinking and AI-assisted decision framing.
+
+## Verification against sprint goal
+
+- What changed: YES, explicit event-based summary is present.
+- What is at risk: YES, risks and urgency are visible in briefing, KPIs and insights.
+- What needs attention: YES, explicit actions and risk labels are present.
+- What to do first: YES, Priority #1 exists with rationale, owner and deadline.
+- Under 30 seconds comprehension: PARTIALLY. Achievable for absence mode; slightly less immediate in cover mode due ownership/context ambiguity.
+
+## Critical issues
+
+- None identified.
+
+## High issues
+
+### 1. HIGH — FR localization is not fully complete and includes mixed-language labels
+- Problem: Multiple FR dashboard strings still include English terms (for example "Owner", "owner") and partial untranslated wording.
+- Why it matters: Sprint requirements explicitly require complete EN/FR and no mixed-language Dashboard.
+- Evidence locations:
+   - src/components/recruitment/PriorityActions.tsx
+   - src/components/recruitment/InsightsPanel.tsx
+   - src/app/page.tsx
+- Severity: HIGH
+
+### 2. HIGH — Cover mode context is not explicit enough for a true handoff operator
+- Problem: Cover briefing is available, but the user cannot explicitly choose/change cover actor in the Dashboard UI, and the owner lens remains implicit.
+- Why it matters: A temporary cover user should quickly understand ownership and responsibility boundaries without prior context.
+- Evidence locations:
+   - src/components/dashboard/ExecutiveBriefing.tsx
+   - src/app/page.tsx
+   - src/lib/demoExperience.tsx
+- Severity: HIGH
+
+## Medium issues
+
+### 3. MEDIUM — Priority #1 is present but not visually dominant enough in all contexts
+- Problem: Priority #1 is in the third layer card with light emphasis; on compact layouts it may require extra scanning before feeling "the" primary decision.
+- Why it matters: Sprint intent requires immediate first-action convergence.
+- Evidence locations:
+   - src/components/dashboard/ExecutiveBriefing.tsx
+   - src/app/globals.css
+- Severity: MEDIUM
+
+### 4. MEDIUM — Catch-up completion state exists but has limited visible behavioral effect
+- Problem: catchUpCompleted is persisted but not clearly reflected in a post-catch-up UI state transition.
+- Why it matters: The transition from catch-up to normal monitoring is part of the architecture contract and should be visible for QA clarity.
+- Evidence locations:
+   - src/lib/demoExperience.tsx
+   - src/app/page.tsx
+- Severity: MEDIUM
+
+### 5. MEDIUM — Cross-screen coherence narrative for cover priorities can still feel indirect
+- Problem: Cover Brief prioritization references multi-owner actions, but direct contextual navigation/handoff cues across Team/Profile are still limited.
+- Why it matters: Cover users need fast trust that dashboard priorities map cleanly to execution surfaces.
+- Evidence locations:
+   - src/lib/dashboardBriefing.ts
+   - src/app/candidate-profile/page.tsx
+   - src/components/recruitment/TeamPage.tsx
+- Severity: MEDIUM
+
+## Nice-to-have improvements
+
+- Add explicit post-catch-up "briefing completed" badge/state in hero.
+- Add lightweight actor switcher in Cover Brief for manager vs teammate context.
+- Increase mobile-first priority prominence by surfacing a compact sticky Priority #1 summary.
+- Provide direct deep links from recommended actions to exact execution surfaces.
+
+## Detailed verification notes
+
+### 1. Executive Briefing
+- Since your last visit context: clear and immediate.
+- What changed discoverability: good, presented in dedicated layer.
+- Greeting dominance: corrected; "Bonjour Sabrina" is now secondary.
+- Estimated catch-up time: useful and believable in absence mode; acceptable in cover mode.
+
+### 2. Priority #1
+- Single dominant priority exists in both Absence and Cover briefs.
+- Why-now rationale exists and is specific.
+- Action, urgency/deadline and owner are present.
+- Maya coherence across screens is broadly consistent with canonical data.
+
+### 3. What Changed
+- Presented as event-style changes rather than vanity totals.
+- Absence scenario effectively communicates progression during time away.
+
+### 4. What Needs Attention
+- Risks and blockers are visible in dedicated layer + insights + KPI risk badges.
+- Urgency is understandable via status/urgency labels.
+
+### 5. What To Do Now
+- Actions are explicit and operational.
+- Vague CTA patterns are replaced by action verbs and outcomes.
+
+### 6. KPIs
+- Mostly decision-oriented with value + delta + meaning + status.
+- Reduced metric noise vs previous dashboard.
+
+### 7. AI Insights
+- Required structure is present: signal, impact, urgency, action, owner.
+- Feels decision-support oriented and deterministic.
+
+### 8. Absence Brief
+- Pass: a returning recruiter can regain situational awareness quickly.
+
+### 9. Cover Brief
+- Partial pass: strategic context is present, but operator ownership clarity can be improved.
+
+### 10. State & Reset
+- Briefing type switching: functional.
+- Priority/catch-up/cover state: persisted in shared demo state.
+- Reset demo: restores baseline including dashboard intelligence state.
+
+### 11. Localization
+- Partial pass due to mixed EN/FR labels remaining.
+
+### 12. Responsive
+- Desktop: strong hierarchy.
+- Tablet: hierarchy preserved.
+- Mobile: content remains readable, but Priority #1 salience can improve.
+
+### 13. Cross-screen consistency
+- Broadly coherent with shared candidate narrative (especially Maya Chen).
+- Remaining limitation: cover-handoff execution cues across Team/Profile remain less direct.
+
+## Portfolio impact scoring (1-10)
+
+- Product Thinking: 9/10
+- Business Understanding: 8.5/10
+- UX reasoning: 8/10
+- Decision-support quality: 8.5/10
+- AI product credibility: 8/10
+- MVP thinking: 8.5/10
+- Demo quality: 8/10
+- Portfolio impact: 8.5/10
+
+## Would this materially strengthen Sabrina's Product Builder application?
+
+Yes. This Dashboard demonstrates clear product framing, decision-support logic, deterministic AI-oriented execution, and credible cross-functional thinking for recruiter workflows.
+
+## Sprint review
+
+Sprint Goal achieved:
+PARTIALLY
+
+Business value delivered:
+The Dashboard now provides a real operational briefing flow for returning users and cover scenarios, with explicit decisions, risks and next actions.
+
+Main learning:
+Decision-support quality increases significantly when event summaries, risk visibility and first-action clarity are unified in one hero-level briefing contract.
+
+Recommendation for next sprint:
+Complete localization parity, strengthen Cover-mode operator control, and make Priority #1 even more dominant on mobile and tablet.
+
+## Demo-readiness score
+
+8.4/10
+
+## Release recommendation
+
+READY WITH MINOR FIXES
+
+## Single most important improvement before moving on
+
+Finalize full FR localization and remove mixed-language "owner" phrasing across all new Dashboard briefing blocks.
 
 All agents must use this file as shared project context.
 
