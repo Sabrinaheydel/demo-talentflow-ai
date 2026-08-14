@@ -5,6 +5,7 @@ import { LanguageProvider } from "../lib/i18n";
 import { DemoExperienceProvider } from "../lib/demoExperience";
 import { ActionExecutionSurface } from "../components/actions/ActionExecutionSurface";
 import { GuidedDemoOverlay } from "../components/demo/GuidedDemoOverlay";
+import { PostHogAnalytics } from "../components/analytics/PostHogAnalytics";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
             {children}
             <ActionExecutionSurface />
             <GuidedDemoOverlay />
+            <PostHogAnalytics />
           </DemoExperienceProvider>
         </LanguageProvider>
       </body>
