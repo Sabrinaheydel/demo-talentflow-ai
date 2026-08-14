@@ -33,6 +33,7 @@ The primary demo narrative centers on Maya Chen and should remain consistent acr
 - shared deterministic demo data and lightweight client-side demo state
 - server-side `/api/copilot` boundary returning deterministic simulated recommendations
 - EN/FR localization
+- PostHog EU observability layer for product analytics, privacy-aware session replay, and browser exception tracking
 - OpenNext + Cloudflare/Wrangler configuration
 - Webflow Cloud deployment
 - GitHub for source control and review
@@ -52,7 +53,10 @@ src/
     interviews/
     team/
   components/
+    analytics/
   lib/
+    analytics.ts
+
 docs/
   docs/project-context.md
   product-operating-system.md
@@ -74,7 +78,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The deterministic demo currently requires **no secret API key**.
+The deterministic demo currently requires **no secret API key**. PostHog remains disabled when `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` is unset.
 
 The app is available locally at `http://localhost:3000`.
 
@@ -88,9 +92,20 @@ Pull requests and pushes to `main` run a clean-install + build quality gate thro
 
 ## Observability
 
-TalentFlow is being prepared for a dedicated PostHog project so product analytics, UX debugging, session replay, and client-side error tracking remain separated from other Agence 360 properties.
+TalentFlow uses a dedicated **TalentFlow** project in PostHog EU so telemetry is kept separate from other Agence 360 properties.
 
-When that project is created, configure the variables documented in `.env.example` and `docs/production-readiness.md`.
+The browser integration is deliberately privacy-first:
+
+- SPA page views are captured through PostHog's current recommended defaults
+- Guided Demo start, completion, skip, and scene progression are tracked
+- Copilot interaction type is tracked without sending prompt or message text
+- EN/FR language changes are tracked
+- action previews and completed actions are tracked with structured IDs
+- unhandled browser errors and promise rejections are captured
+- session replay masks every input and additionally masks user Copilot message text
+- console errors are not automatically forwarded
+
+Configure the variables documented in `.env.example` and `docs/production-readiness.md` in Webflow Cloud before expecting events in PostHog.
 
 ## Deployment
 
@@ -99,7 +114,7 @@ When that project is created, configure the variables documented in `.env.exampl
 - Main deployable branch: `main`
 - Structural work should be developed through branches and pull requests before merge
 
-No production deployment is triggered by the production-readiness documentation changes themselves.
+No production deployment is triggered by the production-readiness branch itself.
 
 ## Product and engineering documentation
 
