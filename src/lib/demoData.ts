@@ -157,7 +157,7 @@ export const canonicalCandidates: CanonicalCandidateProfile[] = [
     interviewStatus: "Feedback pending",
     interviewDate: "Tomorrow",
     interviewTime: "09:30",
-    recruiters: ["David Klein"],
+    recruiters: ["Sarah Martin"],
     focusAreas: ["Customer empathy", "Cross-functional leadership", "Escalation handling"],
     risks: ["Transitioning from SMB to enterprise", "Compensation expectations"],
     questions: [
