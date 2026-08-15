@@ -29,13 +29,17 @@ type CopilotResponse = {
 };
 
 function detectIntent(message: string, fallback: string) {
-  const normalized = `${message} ${fallback}`.toLowerCase();
-  if (/(summarize|summary|overview|profile)/.test(normalized)) return "summarize";
-  if (/(compare|versus|vs|difference|differ)/.test(normalized)) return "compare";
-  if (/(question|questions|interview)/.test(normalized)) return "questions";
-  if (/(email|message|contact|write)/.test(normalized)) return "email";
-  if (/(risk|risks|concern|warning|problem)/.test(normalized)) return "risks";
-  if (/(next|recommend|action|plan|schedule)/.test(normalized)) return "action";
+  const normalized = `${message} ${fallback}`
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (/(summarize|summary|overview|profile|resume|resumer|synthese|brief|profil)/.test(normalized)) return "summarize";
+  if (/(compare|versus|vs|difference|differ|comparer|comparaison)/.test(normalized)) return "compare";
+  if (/(question|questions|interview|entretien|guide)/.test(normalized)) return "questions";
+  if (/(email|message|contact|write|ecrire|rediger|mail)/.test(normalized)) return "email";
+  if (/(risk|risks|concern|warning|problem|risque|risques|alerte|probleme)/.test(normalized)) return "risks";
+  if (/(next|recommend|action|plan|schedule|prochaine|recommand|planning|planifier)/.test(normalized)) return "action";
   return "action";
 }
 
