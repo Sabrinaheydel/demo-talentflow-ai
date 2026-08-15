@@ -1,43 +1,71 @@
 # TalentFlow AI Dash
 
-TalentFlow is a premium bilingual recruitment demo built with Next.js, OpenNext, and Webflow Cloud. It showcases an AI-assisted hiring workspace with a dashboard, candidate profile, recruitment pipeline, and copilot experience for modern recruiting teams.
+TalentFlow is a premium bilingual recruitment product demo built with Next.js, TypeScript, OpenNext, and Webflow Cloud. It demonstrates an AI-assisted hiring workspace designed around recruiter situational awareness, candidate prioritization, interview coordination, transparent actions, and decision support.
 
-> Demo disclaimer: candidate profiles, pipeline activity, and AI outputs shown in this experience are simulated for product presentation and demo purposes.
+> **Portfolio demo:** candidate profiles, recruitment activity, product state, and Copilot outputs are simulated. TalentFlow does not currently process real candidate data or call a live AI provider.
 
-## Routes
+## Product story
 
-- `/` — executive dashboard overview
-- `/pipeline` — interactive Kanban-style recruitment pipeline
-- `/candidate-profile` — premium candidate profile experience
-- `/copilot` — AI recruitment copilot workspace
+A recruiter can:
+
+1. understand what changed and what needs attention from the dashboard
+2. inspect the recruitment pipeline
+3. review candidate evidence and risk
+4. use the simulated Copilot to prepare the next decision
+5. coordinate interviews and team actions
+6. see explicit previews and visible results for meaningful actions
+
+The primary demo narrative centers on Maya Chen and should remain consistent across the product.
+
+## Core routes
+
+- `/` — executive operational briefing
+- `/pipeline` — recruitment pipeline
+- `/candidate-profile` — candidate decision workspace
+- `/copilot` — simulated AI recruitment Copilot
+- `/interviews` — interview coordination
+- `/team` — team and ownership context
 
 ## Architecture
 
-- Next.js App Router for the UI shell and route structure
-- React components for reusable dashboard, pipeline, and copilot experiences
-- Local lightweight language state for EN/FR switching without extra i18n dependencies
-- OpenNext + Cloudflare/Wrangler configuration for Webflow Cloud deployment compatibility
+- Next.js App Router
+- React 19 + TypeScript
+- shared deterministic demo data and lightweight client-side demo state
+- server-side `/api/copilot` boundary returning deterministic simulated recommendations
+- EN/FR localization
+- PostHog EU observability layer for product analytics, privacy-aware session replay, and browser exception tracking
+- OpenNext + Cloudflare/Wrangler configuration
+- Webflow Cloud deployment
+- GitHub for source control and review
 
-## Project structure
+The current public-demo architecture intentionally favors deterministic behavior, clarity, and maintainability over production ATS complexity.
+
+## Repository structure
 
 ```text
 src/
   app/
+    api/copilot/route.ts
     page.tsx
-    pipeline/page.tsx
-    candidate-profile/page.tsx
-    copilot/page.tsx
-  components/
-    dashboard/
-    layout/
-    recruitment/
+    pipeline/
+    candidate-profile/
     copilot/
-    ui/
+    interviews/
+    team/
+  components/
+    analytics/
   lib/
-    i18n.tsx
+    analytics.ts
+
+docs/
+  docs/project-context.md
+  product-operating-system.md
+  production-readiness.md
+.github/
+  agents/
+  workflows/quality.yml
 next.config.ts
 open-next.config.ts
-package.json
 webflow.json
 wrangler.json
 ```
@@ -45,18 +73,14 @@ wrangler.json
 ## Local development
 
 ```bash
-npm install
+npm ci
 cp .env.example .env.local
 npm run dev
 ```
 
-Set the required environment variable in your local environment before starting the app:
+The deterministic demo currently requires **no secret API key**. PostHog remains disabled when `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` is unset.
 
-```bash
-OPENAI_API_KEY=your_openai_api_key_here
-```
-
-The app will be available at http://localhost:3000.
+The app is available locally at `http://localhost:3000`.
 
 ## Build
 
@@ -64,21 +88,40 @@ The app will be available at http://localhost:3000.
 npm run build
 ```
 
-## Deployment notes
+Pull requests and pushes to `main` run a clean-install + build quality gate through GitHub Actions.
 
-- The project is configured for Webflow Cloud using the existing Next.js + OpenNext + Wrangler setup.
-- The current deployment target is the repository’s main branch.
-- No deployment has been executed from this session.
-- Keep the existing visual design intact when making changes for production.
-- Configure the following environment variable in Webflow Cloud before enabling the Copilot API route:
+## Observability
 
-```bash
-OPENAI_API_KEY=your_openai_api_key_here
-```
+TalentFlow uses a dedicated **TalentFlow** project in PostHog EU so telemetry is kept separate from other Agence 360 properties.
 
-### Webflow Cloud setup
+The browser integration is deliberately privacy-first:
 
-1. Open the Webflow Cloud project environment settings.
-2. Add a new environment variable named OPENAI_API_KEY.
-3. Paste your OpenAI API key as the value.
-4. Redeploy the application so the runtime picks up the new variable.
+- SPA page views are captured through PostHog's current recommended defaults
+- Guided Demo start, completion, skip, and scene progression are tracked
+- Copilot interaction type is tracked without sending prompt or message text
+- EN/FR language changes are tracked
+- action previews and completed actions are tracked with structured IDs
+- unhandled browser errors and promise rejections are captured
+- session replay masks every input and additionally masks user Copilot message text
+- console errors are not automatically forwarded
+
+Configure the variables documented in `.env.example` and `docs/production-readiness.md` in Webflow Cloud before expecting events in PostHog.
+
+## Deployment
+
+- Deployment target: Webflow Cloud
+- Runtime compatibility: OpenNext / Cloudflare
+- Main deployable branch: `main`
+- Structural work should be developed through branches and pull requests before merge
+
+No production deployment is triggered by the production-readiness branch itself.
+
+## Product and engineering documentation
+
+- `docs/docs/project-context.md` — product vision, demo story, scope, decision logs, and sprint context
+- `docs/product-operating-system.md` — product principles and operating rules
+- `docs/production-readiness.md` — launch, repository, privacy, observability, and quality checklist
+
+## Safety boundaries
+
+TalentFlow is currently a portfolio demonstration, not a production applicant tracking system. Real authentication, production candidate databases, external ATS integrations, outbound communications, and live AI execution remain out of scope unless explicitly introduced in a future architecture phase.
