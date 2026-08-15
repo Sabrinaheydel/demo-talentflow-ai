@@ -111,8 +111,11 @@ export function PostHogAnalytics() {
     let cancelled = false;
 
     fetch("/api/analytics-config", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((value: AnalyticsConfig | null) => {
+      .then(async (response): Promise<AnalyticsConfig | null> => {
+        if (!response.ok) return null;
+        return (await response.json()) as AnalyticsConfig;
+      })
+      .then((value) => {
         if (!cancelled) setConfig(value);
       })
       .catch(() => {
