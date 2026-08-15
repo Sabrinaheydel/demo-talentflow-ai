@@ -1,13 +1,15 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDemoExperience } from "../../lib/demoExperience";
 import { useLanguage } from "../../lib/i18n";
 import { trackAnalyticsEvent } from "../../lib/analytics";
 
-const POSTHOG_TOKEN = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
-const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com";
+type AnalyticsConfig = {
+  posthogToken: string | null;
+  posthogHost: string;
+};
 
 function ProductTelemetryObserver() {
   const { language } = useLanguage();
@@ -31,15 +33,9 @@ function ProductTelemetryObserver() {
   useEffect(() => {
     const status = state.guidedDemo.status;
     if (previousGuidedStatus.current !== status) {
-      if (status === "running") {
-        trackAnalyticsEvent("guided demo started", { language });
-      }
-      if (status === "completed") {
-        trackAnalyticsEvent("guided demo completed", { language });
-      }
-      if (status === "skipped") {
-        trackAnalyticsEvent("guided demo skipped", { language });
-      }
+      if (status === "running") trackAnalyticsEvent("guided demo started", { language });
+      if (status === "completed") trackAnalyticsEvent("guided demo completed", { language });
+      if (status === "skipped") trackAnalyticsEvent("guided demo skipped", { language });
       previousGuidedStatus.current = status;
     }
   }, [language, state.guidedDemo.status]);
@@ -109,12 +105,31 @@ function ProductTelemetryObserver() {
 }
 
 export function PostHogAnalytics() {
-  if (!POSTHOG_TOKEN) return null;
+  const [config, setConfig] = useState<AnalyticsConfig | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/analytics-config", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((value: AnalyticsConfig | null) => {
+        if (!cancelled) setConfig(value);
+      })
+      .catch(() => {
+        if (!cancelled) setConfig(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!config?.posthogToken) return null;
 
   const initScript = `
     !function(t,e){var o,n,p,r;e.__SV||(window.posthog&&window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||(p=t.createElement("script"),p.type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister identify reset get_distinct_id captureException".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-    posthog.init(${JSON.stringify(POSTHOG_TOKEN)}, {
-      api_host: ${JSON.stringify(POSTHOG_HOST)},
+    posthog.init(${JSON.stringify(config.posthogToken)}, {
+      api_host: ${JSON.stringify(config.posthogHost)},
       ui_host: "https://eu.posthog.com",
       defaults: "2026-05-30",
       autocapture: {
