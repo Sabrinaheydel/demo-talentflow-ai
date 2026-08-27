@@ -7,6 +7,7 @@ import { useLanguage } from "../../lib/i18n";
 const copy = {
   en: {
     button: "Give feedback",
+    buttonShort: "Feedback",
     title: "Help improve TalentFlow",
     intro: "This is a public portfolio demo with simulated data. Your feedback helps improve the product experience.",
     rating: "How clear and useful did TalentFlow feel?",
@@ -25,6 +26,7 @@ const copy = {
   },
   fr: {
     button: "Envoyer votre avis",
+    buttonShort: "Votre avis",
     title: "Aidez-moi à améliorer TalentFlow",
     intro: "TalentFlow est une démo portfolio publique utilisant des données simulées. Votre avis m’aide à améliorer l’expérience produit.",
     rating: "TalentFlow vous a-t-il semblé clair et utile ?",
@@ -116,7 +118,8 @@ export function FeedbackLauncher() {
     <>
       <button type="button" className="feedback-launcher" onClick={openFeedback}>
         <span aria-hidden="true">✦</span>
-        <span>{text.button}</span>
+        <span className="feedback-launcher__label feedback-launcher__label--desktop">{text.button}</span>
+        <span className="feedback-launcher__label feedback-launcher__label--mobile">{text.buttonShort}</span>
       </button>
 
       {open ? (
