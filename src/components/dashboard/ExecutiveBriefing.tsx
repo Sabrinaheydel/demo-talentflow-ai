@@ -28,13 +28,15 @@ export function ExecutiveBriefing({
   onPrimaryAction,
 }: ExecutiveBriefingProps) {
   const [catchUpStatus, setCatchUpStatus] = useState<"idle" | "running" | "complete">("idle");
+  const priorityQueueProcessed = packet.priorityOne.id === "all-priorities-processed";
+  const effectiveCatchUpStatus = priorityQueueProcessed ? "complete" : catchUpStatus;
 
   useEffect(() => {
     setCatchUpStatus("idle");
   }, [activeBriefingType]);
 
   const handlePrimaryAction = () => {
-    if (catchUpStatus !== "idle") return;
+    if (priorityQueueProcessed || catchUpStatus !== "idle") return;
 
     setCatchUpStatus("running");
     onPrimaryAction();
@@ -44,17 +46,19 @@ export function ExecutiveBriefing({
     }, 700);
   };
 
-  const catchUpLabel = catchUpStatus === "running"
-    ? (language === "en" ? "Synchronizing context..." : "Synchronisation du contexte...")
-    : catchUpStatus === "complete"
-      ? (language === "en" ? "Catch-up complete ✓" : "Rattrapage termine ✓")
-      : packet.primaryCta;
+  const catchUpLabel = priorityQueueProcessed
+    ? (language === "en" ? "Priority actions processed ✓" : "Actions prioritaires traitées ✓")
+    : effectiveCatchUpStatus === "running"
+      ? (language === "en" ? "Synchronizing context..." : "Synchronisation du contexte...")
+      : effectiveCatchUpStatus === "complete"
+        ? (language === "en" ? "Catch-up complete ✓" : "Rattrapage terminé ✓")
+        : packet.primaryCta;
 
   return (
     <section className="briefing-hero" data-guided-target="executive-briefing">
       <div className="briefing-hero__header">
         <div>
-          <p className="eyebrow">{language === "en" ? "Executive briefing" : "Briefing executif"}</p>
+          <p className="eyebrow">{language === "en" ? "Executive briefing" : "Briefing exécutif"}</p>
           <h2 className="briefing-hero__title">{packet.title}</h2>
           <p className="briefing-hero__greeting">{packet.greeting}</p>
           <p className="briefing-hero__summary">{packet.summary}</p>
@@ -63,28 +67,30 @@ export function ExecutiveBriefing({
 
         <div className="briefing-meta-stack">
           <div className="metric-pill">
-            <span>{language === "en" ? "Time window" : "Fenetre"}</span>
+            <span>{language === "en" ? "Time window" : "Fenêtre"}</span>
             <strong>{packet.timeWindow}</strong>
           </div>
           <div className="metric-pill">
-            <span>{language === "en" ? "Estimated catch-up" : "Rattrapage estime"}</span>
+            <span>{language === "en" ? "Estimated catch-up" : "Rattrapage estimé"}</span>
             <strong>
-              {catchUpStatus === "complete"
-                ? (language === "en" ? "Context synchronized" : "Contexte synchronise")
-                : packet.estimatedCatchUpTime}
+              {priorityQueueProcessed
+                ? (language === "en" ? "Priority queue synchronized" : "File de priorités synchronisée")
+                : effectiveCatchUpStatus === "complete"
+                  ? (language === "en" ? "Context synchronized" : "Contexte synchronisé")
+                  : packet.estimatedCatchUpTime}
             </strong>
           </div>
           <button
             type="button"
-            className={`btn ${catchUpStatus === "complete" ? "btn--secondary" : "btn--primary"}`}
+            className={`btn ${effectiveCatchUpStatus === "complete" ? "btn--secondary" : "btn--primary"}`}
             onClick={handlePrimaryAction}
-            disabled={catchUpStatus !== "idle"}
+            disabled={priorityQueueProcessed || catchUpStatus !== "idle"}
             aria-live="polite"
           >
             {catchUpLabel}
           </button>
 
-          {catchUpStatus === "complete" ? (
+          {effectiveCatchUpStatus === "complete" ? (
             <div
               className="metric-pill"
               role="status"
@@ -92,10 +98,14 @@ export function ExecutiveBriefing({
               style={{ background: "#ecfdf5", borderColor: "#a7f3d0" }}
             >
               <span style={{ color: "#047857" }}>
-                {language === "en" ? "Next best action ready" : "Prochaine action prioritaire prete"}
+                {priorityQueueProcessed
+                  ? (language === "en" ? "Operational state updated" : "État opérationnel actualisé")
+                  : (language === "en" ? "Next best action ready" : "Prochaine action prioritaire prête")}
               </span>
               <strong style={{ color: "#065f46" }}>
-                {language === "en" ? "Priority 1 identified" : "Priorite 1 identifiee"}
+                {priorityQueueProcessed
+                  ? (language === "en" ? "Priority queue processed" : "File de priorités traitée")
+                  : (language === "en" ? "Priority 1 identified" : "Priorité 1 identifiée")}
               </strong>
               <p style={{ margin: "7px 0 0", color: "#047857", fontSize: "0.82rem", lineHeight: 1.45 }}>
                 {packet.priorityOne.recommendedAction}
@@ -113,7 +123,7 @@ export function ExecutiveBriefing({
             className={`briefing-mode-pill ${activeBriefingType === mode.id ? "is-active" : ""}`}
             onClick={() => mode.enabled && onBriefingTypeChange(mode.id)}
             disabled={!mode.enabled}
-            title={!mode.enabled ? (language === "en" ? "Available in the next product iteration." : "Disponible dans la prochaine iteration produit.") : undefined}
+            title={!mode.enabled ? (language === "en" ? "Available in the next product iteration." : "Disponible dans la prochaine itération produit.") : undefined}
           >
             {language === "en" ? mode.en : mode.fr}
           </button>
