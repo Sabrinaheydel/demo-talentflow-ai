@@ -43,6 +43,12 @@ const copy = {
   },
 } as const;
 
+function getApiPath(path: string) {
+  const configuredBasePath = process.env.NEXT_PUBLIC_BASE_PATH?.trim() ?? "";
+  const normalizedBasePath = configuredBasePath === "/" ? "" : configuredBasePath.replace(/\/$/, "");
+  return `${normalizedBasePath}${path}`;
+}
+
 export function FeedbackLauncher() {
   const { language } = useLanguage();
   const text = copy[language];
@@ -72,7 +78,7 @@ export function FeedbackLauncher() {
     setStatus("sending");
 
     try {
-      const response = await fetch("/api/feedback", {
+      const response = await fetch(getApiPath("/api/feedback"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
