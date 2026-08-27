@@ -4,7 +4,7 @@
 - [x] Feedback launcher prepared in French and English
 - [x] PostHog beta dashboard created
 - [x] LinkedIn UTM acquisition context captured
-- [ ] CI build green
+- [x] CI build green
 - [ ] Feedback email delivery configured and tested
 - [ ] Mobile QA validated at phone, tablet and desktop widths
 - [ ] Merge and deploy
