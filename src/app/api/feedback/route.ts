@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-export const runtime = "edge";
-
 const MAX_COMMENT_LENGTH = 2500;
 
 type FeedbackPayload = {
