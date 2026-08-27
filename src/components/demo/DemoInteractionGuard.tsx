@@ -191,15 +191,17 @@ export function DemoInteractionGuard() {
           ×
         </button>
 
-        <p className="demo-interaction-eyebrow">{surface.eyebrow}</p>
-        <h2 id="demo-interaction-title">{surface.title}</h2>
-        <p className="demo-interaction-body">{surface.body}</p>
+        <div className="demo-interaction-content">
+          <p className="demo-interaction-eyebrow">{surface.eyebrow}</p>
+          <h2 id="demo-interaction-title">{surface.title}</h2>
+          <p className="demo-interaction-body">{surface.body}</p>
 
-        {surface.items?.length ? (
-          <ul className="demo-interaction-list">
-            {surface.items.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        ) : null}
+          {surface.items?.length ? (
+            <ul className="demo-interaction-list">
+              {surface.items.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          ) : null}
+        </div>
 
         <div className="demo-interaction-actions">
           <button type="button" className="btn btn--primary" onClick={handlePrimaryAction}>
