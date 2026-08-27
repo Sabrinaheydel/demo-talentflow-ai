@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { BriefingPacket } from "../../lib/dashboardBriefing";
 import { DashboardBriefingType } from "../../lib/demoExperience";
 
@@ -24,6 +27,29 @@ export function ExecutiveBriefing({
   onBriefingTypeChange,
   onPrimaryAction,
 }: ExecutiveBriefingProps) {
+  const [catchUpStatus, setCatchUpStatus] = useState<"idle" | "running" | "complete">("idle");
+
+  useEffect(() => {
+    setCatchUpStatus("idle");
+  }, [activeBriefingType]);
+
+  const handlePrimaryAction = () => {
+    if (catchUpStatus !== "idle") return;
+
+    setCatchUpStatus("running");
+    onPrimaryAction();
+
+    window.setTimeout(() => {
+      setCatchUpStatus("complete");
+    }, 700);
+  };
+
+  const catchUpLabel = catchUpStatus === "running"
+    ? (language === "en" ? "Synchronizing context..." : "Synchronisation du contexte...")
+    : catchUpStatus === "complete"
+      ? (language === "en" ? "Catch-up complete ✓" : "Rattrapage termine ✓")
+      : packet.primaryCta;
+
   return (
     <section className="briefing-hero" data-guided-target="executive-briefing">
       <div className="briefing-hero__header">
@@ -42,11 +68,40 @@ export function ExecutiveBriefing({
           </div>
           <div className="metric-pill">
             <span>{language === "en" ? "Estimated catch-up" : "Rattrapage estime"}</span>
-            <strong>{packet.estimatedCatchUpTime}</strong>
+            <strong>
+              {catchUpStatus === "complete"
+                ? (language === "en" ? "Context synchronized" : "Contexte synchronise")
+                : packet.estimatedCatchUpTime}
+            </strong>
           </div>
-          <button type="button" className="btn btn--primary" onClick={onPrimaryAction}>
-            {packet.primaryCta}
+          <button
+            type="button"
+            className={`btn ${catchUpStatus === "complete" ? "btn--secondary" : "btn--primary"}`}
+            onClick={handlePrimaryAction}
+            disabled={catchUpStatus !== "idle"}
+            aria-live="polite"
+          >
+            {catchUpLabel}
           </button>
+
+          {catchUpStatus === "complete" ? (
+            <div
+              className="metric-pill"
+              role="status"
+              aria-live="polite"
+              style={{ background: "#ecfdf5", borderColor: "#a7f3d0" }}
+            >
+              <span style={{ color: "#047857" }}>
+                {language === "en" ? "Next best action ready" : "Prochaine action prioritaire prete"}
+              </span>
+              <strong style={{ color: "#065f46" }}>
+                {language === "en" ? "Priority 1 identified" : "Priorite 1 identifiee"}
+              </strong>
+              <p style={{ margin: "7px 0 0", color: "#047857", fontSize: "0.82rem", lineHeight: 1.45 }}>
+                {packet.priorityOne.recommendedAction}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
 
