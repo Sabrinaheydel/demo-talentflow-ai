@@ -1,7 +1,7 @@
 .feedback-launcher {
   position: fixed;
   right: 22px;
-  bottom: 22px;
+  bottom: 72px;
   z-index: 70;
   display: inline-flex;
   align-items: center;
@@ -218,7 +218,7 @@
 @media (max-width: 640px) {
   .feedback-launcher {
     right: 12px;
-    bottom: calc(12px + env(safe-area-inset-bottom));
+    bottom: calc(72px + env(safe-area-inset-bottom));
     max-width: calc(100vw - 24px);
   }
 
