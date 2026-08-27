@@ -81,6 +81,12 @@ export default function Home() {
             onPrimaryAction={() => {
               completeCatchUp();
               addStoryStep(language === "en" ? "Executive catch-up launched" : "Rattrapage executif demarre");
+
+              window.setTimeout(() => {
+                document
+                  .querySelector('[data-guided-target="priority-1"]')
+                  ?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 1200);
             }}
           />
 
