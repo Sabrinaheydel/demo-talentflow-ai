@@ -4,6 +4,16 @@ export const runtime = "edge";
 
 const MAX_COMMENT_LENGTH = 2500;
 
+type FeedbackPayload = {
+  rating?: unknown;
+  comment?: unknown;
+  name?: unknown;
+  email?: unknown;
+  contactConsent?: unknown;
+  language?: unknown;
+  page?: unknown;
+};
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -19,14 +29,14 @@ function isValidEmail(value: string) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const rating = Number(body?.rating);
-    const comment = typeof body?.comment === "string" ? body.comment.trim().slice(0, MAX_COMMENT_LENGTH) : "";
-    const name = typeof body?.name === "string" ? body.name.trim().slice(0, 120) : "";
-    const email = typeof body?.email === "string" ? body.email.trim().slice(0, 180) : "";
-    const contactConsent = Boolean(body?.contactConsent);
-    const language = body?.language === "fr" ? "fr" : "en";
-    const page = typeof body?.page === "string" ? body.page.trim().slice(0, 300) : "/";
+    const body = (await request.json()) as FeedbackPayload;
+    const rating = Number(body.rating);
+    const comment = typeof body.comment === "string" ? body.comment.trim().slice(0, MAX_COMMENT_LENGTH) : "";
+    const name = typeof body.name === "string" ? body.name.trim().slice(0, 120) : "";
+    const email = typeof body.email === "string" ? body.email.trim().slice(0, 180) : "";
+    const contactConsent = Boolean(body.contactConsent);
+    const language = body.language === "fr" ? "fr" : "en";
+    const page = typeof body.page === "string" ? body.page.trim().slice(0, 300) : "/";
 
     if (!Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 3) {
       return NextResponse.json({ error: "invalid_feedback" }, { status: 400 });
