@@ -22,6 +22,10 @@
   transform: translateY(-1px);
 }
 
+.feedback-launcher__label--mobile {
+  display: none;
+}
+
 .feedback-overlay {
   position: fixed;
   inset: 0;
@@ -218,8 +222,21 @@
 @media (max-width: 640px) {
   .feedback-launcher {
     right: 12px;
-    bottom: calc(72px + env(safe-area-inset-bottom));
-    max-width: calc(100vw - 24px);
+    bottom: calc(108px + env(safe-area-inset-bottom));
+    min-height: 38px;
+    padding: 8px 11px;
+    gap: 6px;
+    max-width: none;
+    font-size: 13px;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.18);
+  }
+
+  .feedback-launcher__label--desktop {
+    display: none;
+  }
+
+  .feedback-launcher__label--mobile {
+    display: inline;
   }
 
   .feedback-overlay {
