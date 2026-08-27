@@ -1,0 +1,482 @@
+/* TalentFlow public beta mobile experience.
+   Desktop remains the reference workspace, while small screens stay fully explorable. */
+
+.public-beta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding: 6px 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.public-beta-badge__dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+@media (max-width: 860px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    display: block;
+    min-width: 0;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    width: 100%;
+    min-height: auto;
+    padding: 10px 12px 8px;
+    border-right: 0;
+    border-bottom: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.96);
+    color: #0f172a;
+    backdrop-filter: blur(14px);
+  }
+
+  .brand-block {
+    margin-bottom: 8px;
+    padding-bottom: 0;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+  }
+
+  .brand-name {
+    font-size: 14px;
+    color: #0f172a;
+  }
+
+  .brand-subtitle {
+    font-size: 11px;
+    color: #64748b;
+  }
+
+  .workspace-card,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar-nav::-webkit-scrollbar,
+  .top-header__actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebar-nav__item {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: #475569;
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
+
+  .sidebar-nav__item.is-active,
+  .sidebar-nav__item:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  .main-panel {
+    min-width: 0;
+  }
+
+  .top-header {
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-block: 10px 4px;
+  }
+
+  .top-header h1 {
+    font-size: clamp(1.45rem, 6vw, 2rem);
+    line-height: 1.12;
+  }
+
+  .top-header__actions {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .top-header__actions > * {
+    flex: 0 0 auto;
+  }
+
+  .hero-panel,
+  .candidate-hero,
+  .pipeline-banner,
+  .briefing-hero__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-panel,
+  .candidate-hero,
+  .pipeline-banner,
+  .briefing-hero,
+  .section-card,
+  .copilot-chat-panel,
+  .modal-card {
+    min-width: 0;
+  }
+
+  .hero-metrics,
+  .briefing-meta-stack {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .candidate-hero__identity {
+    align-items: flex-start;
+  }
+
+  .candidate-hero__insights {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .candidate-score-card {
+    min-width: 0;
+  }
+
+  .content-grid,
+  .copilot-shell,
+  .detail-grid,
+  .team-grid,
+  .interview-list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .briefing-layer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pipeline-board {
+    display: grid;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(84vw, 330px);
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x mandatory;
+    padding: 2px 2px 12px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pipeline-board > * {
+    scroll-snap-align: start;
+  }
+
+  .pipeline-column {
+    min-width: 0;
+  }
+
+  .pipeline-toolbar,
+  .pipeline-toolbar__actions,
+  .interview-toolbar-grid,
+  .team-filter-grid {
+    min-width: 0;
+  }
+
+  .copilot-context-grid,
+  .artifact-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .copilot-message__bubble {
+    max-width: 92%;
+  }
+
+  .table-shell,
+  .comparison-table-wrap {
+    max-width: 100%;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-backdrop,
+  .guided-demo-overlay {
+    padding: 14px;
+  }
+
+  .modal-card,
+  .guided-demo-entry-card,
+  .guided-demo-final-card {
+    max-height: calc(100dvh - 28px);
+    overflow-y: auto;
+  }
+
+  .guided-demo-narration {
+    max-height: min(58dvh, 520px);
+    overflow-y: auto;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-panel {
+    padding: 14px 12px calc(144px + env(safe-area-inset-bottom));
+  }
+
+  .main-content,
+  .pipeline-shell,
+  .copilot-shell {
+    gap: 14px;
+  }
+
+  .hero-panel,
+  .candidate-hero,
+  .pipeline-banner,
+  .briefing-hero,
+  .section-card,
+  .copilot-chat-panel,
+  .copilot-side-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .public-beta-badge {
+    max-width: 100%;
+    white-space: normal;
+    font-size: 11px;
+  }
+
+  .top-header {
+    align-items: stretch;
+  }
+
+  .top-header__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .top-header__actions > * {
+    min-width: 0;
+  }
+
+  .top-header__actions > :nth-child(1) {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .top-header__actions > :nth-child(2) {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .top-header__actions > :nth-child(3) {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .top-header__actions > :nth-child(4),
+  .top-header__actions > :nth-child(5) {
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .language-switch {
+    max-width: 100%;
+  }
+
+  .stats-grid,
+  .pipeline-metrics,
+  .interviews-kpi-grid,
+  .interview-toolbar-grid,
+  .scorecard-grid,
+  .team-kpi-grid,
+  .team-filter-grid,
+  .team-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .hero-metrics,
+  .briefing-layer-grid,
+  .candidate-hero__insights,
+  .team-card__metrics,
+  .action-surface-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .candidate-hero__identity {
+    gap: 12px;
+  }
+
+  .candidate-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+  }
+
+  .candidate-hero__row h2 {
+    font-size: 1.25rem;
+  }
+
+  .candidate-hero__meta {
+    gap: 8px 10px;
+    font-size: 0.88rem;
+  }
+
+  .pipeline-board {
+    grid-auto-columns: min(88vw, 320px);
+    margin-right: -12px;
+    padding-right: 12px;
+  }
+
+  .pipeline-card,
+  .team-card {
+    border-radius: 15px;
+  }
+
+  .sidebar-nav__item {
+    font-size: 13px;
+  }
+
+  .top-header__actions .btn,
+  .top-header__actions button,
+  .team-card__actions .btn,
+  .modal-actions .btn,
+  .guided-demo-actions .btn {
+    min-height: 44px;
+  }
+
+  .copilot-chat-panel {
+    padding: 16px;
+  }
+
+  .copilot-composer {
+    padding: 12px;
+  }
+
+  .copilot-composer textarea {
+    min-height: 112px;
+  }
+
+  .copilot-composer__actions,
+  .modal-actions,
+  .guided-demo-actions {
+    width: 100%;
+  }
+
+  .copilot-composer__actions .btn,
+  .modal-actions .btn {
+    flex: 1;
+  }
+
+  .document-card,
+  .stack-list__item,
+  .priority-item,
+  .insight-pill,
+  .interview-card__detail-row,
+  .feedback-row {
+    align-items: flex-start;
+  }
+
+  .toast {
+    right: 12px;
+    bottom: calc(108px + env(safe-area-inset-bottom));
+    max-width: calc(100vw - 24px);
+    border-radius: 14px;
+  }
+
+  .guided-demo-narration {
+    right: 10px;
+    left: 10px;
+    bottom: calc(108px + env(safe-area-inset-bottom));
+    width: auto;
+  }
+}
+
+@media (max-width: 440px) {
+  .stats-grid,
+  .pipeline-metrics,
+  .interviews-kpi-grid,
+  .interview-toolbar-grid,
+  .scorecard-grid,
+  .team-kpi-grid,
+  .team-filter-grid,
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .top-header__actions {
+    gap: 8px;
+  }
+
+  .language-switch button {
+    padding: 8px 10px;
+  }
+
+  .pipeline-board {
+    grid-auto-columns: calc(100vw - 38px);
+  }
+
+  .candidate-hero__identity {
+    flex-direction: column;
+  }
+
+  .copilot-prompt-pill,
+  .copilot-action-item {
+    min-height: 44px;
+  }
+}

@@ -148,6 +148,33 @@ export function PostHogAnalytics() {
         maskTextSelector: ".copilot-message--user"
       }
     });
+
+    try {
+      var talentFlowParams = new URLSearchParams(window.location.search);
+      var acquisitionSource = talentFlowParams.get("utm_source");
+      var acquisitionMedium = talentFlowParams.get("utm_medium");
+      var acquisitionCampaign = talentFlowParams.get("utm_campaign");
+      var acquisitionContent = talentFlowParams.get("utm_content");
+
+      if (acquisitionSource || acquisitionCampaign) {
+        posthog.register_once({
+          acquisition_source: acquisitionSource || "direct",
+          acquisition_medium: acquisitionMedium || "unknown",
+          acquisition_campaign: acquisitionCampaign || "unspecified",
+          acquisition_content: acquisitionContent || "unspecified"
+        });
+        posthog.capture("beta landing viewed", {
+          app: "talentflow",
+          product_mode: "portfolio_demo",
+          acquisition_source: acquisitionSource || "direct",
+          acquisition_medium: acquisitionMedium || "unknown",
+          acquisition_campaign: acquisitionCampaign || "unspecified",
+          acquisition_content: acquisitionContent || "unspecified"
+        });
+      }
+    } catch (error) {
+      console.warn("TalentFlow acquisition tracking could not be initialized.");
+    }
   `;
 
   return (
