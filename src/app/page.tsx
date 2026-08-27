@@ -12,6 +12,7 @@ import { InsightsPanel } from "../components/recruitment/InsightsPanel";
 import { PriorityActions } from "../components/recruitment/PriorityActions";
 import { ExecutiveBriefing } from "../components/dashboard/ExecutiveBriefing";
 import { buildBriefingPacket } from "../lib/dashboardBriefing";
+import { applyDashboardExecutionState } from "../lib/dashboardExecutionState";
 import { useDemoExperience } from "../lib/demoExperience";
 
 export default function Home() {
@@ -26,7 +27,8 @@ export default function Home() {
     setDashboardBriefingMeta,
   } = useDemoExperience();
 
-  const briefingPacket = buildBriefingPacket(state.dashboard.activeBriefingType, state, language);
+  const baseBriefingPacket = buildBriefingPacket(state.dashboard.activeBriefingType, state, language);
+  const briefingPacket = applyDashboardExecutionState(baseBriefingPacket, state, language);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("talentflow-language");
