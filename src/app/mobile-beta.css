@@ -1,6 +1,30 @@
 /* TalentFlow public beta mobile experience.
    Desktop remains the reference workspace, while small screens stay fully explorable. */
 
+.public-beta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding: 6px 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.public-beta-badge__dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
 @media (max-width: 860px) {
   html,
   body {
@@ -245,7 +269,7 @@
 
 @media (max-width: 640px) {
   .main-panel {
-    padding: 14px 12px calc(88px + env(safe-area-inset-bottom));
+    padding: 14px 12px calc(144px + env(safe-area-inset-bottom));
   }
 
   .main-content,
@@ -263,6 +287,55 @@
   .copilot-side-card {
     padding: 16px;
     border-radius: 18px;
+  }
+
+  .public-beta-badge {
+    max-width: 100%;
+    white-space: normal;
+    font-size: 11px;
+  }
+
+  .top-header {
+    align-items: stretch;
+  }
+
+  .top-header__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .top-header__actions > * {
+    min-width: 0;
+  }
+
+  .top-header__actions > :nth-child(1) {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .top-header__actions > :nth-child(2) {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .top-header__actions > :nth-child(3) {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .top-header__actions > :nth-child(4),
+  .top-header__actions > :nth-child(5) {
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .language-switch {
+    max-width: 100%;
   }
 
   .stats-grid,
@@ -361,7 +434,7 @@
 
   .toast {
     right: 12px;
-    bottom: calc(76px + env(safe-area-inset-bottom));
+    bottom: calc(108px + env(safe-area-inset-bottom));
     max-width: calc(100vw - 24px);
     border-radius: 14px;
   }
@@ -369,7 +442,7 @@
   .guided-demo-narration {
     right: 10px;
     left: 10px;
-    bottom: calc(72px + env(safe-area-inset-bottom));
+    bottom: calc(108px + env(safe-area-inset-bottom));
     width: auto;
   }
 }
