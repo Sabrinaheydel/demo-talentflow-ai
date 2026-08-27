@@ -1,0 +1,136 @@
+/* TalentFlow public beta mobile experience.
+   Desktop remains the reference workspace, while small screens stay fully explorable. */
+
+@media (max-width: 860px) {
+  .app-shell {
+    display: block;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    width: 100%;
+    min-height: auto;
+    padding: 10px 12px 8px;
+    border-right: 0;
+    border-bottom: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(14px);
+  }
+
+  .brand-block {
+    margin-bottom: 8px;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand-name {
+    font-size: 14px;
+  }
+
+  .brand-subtitle {
+    font-size: 11px;
+  }
+
+  .workspace-card,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebar-nav__item {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
+
+  .top-header {
+    gap: 12px;
+    padding-block: 14px;
+  }
+
+  .top-header__actions {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .top-header__actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pipeline-board {
+    display: grid;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(84vw, 330px);
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 12px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pipeline-board > * {
+    scroll-snap-align: start;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-panel {
+    padding: 14px;
+  }
+
+  .pipeline-metrics {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .sidebar-nav__item {
+    font-size: 13px;
+  }
+
+  .top-header__actions .button,
+  .top-header__actions button {
+    min-height: 44px;
+  }
+
+  .card,
+  .panel,
+  .metric-card {
+    border-radius: 16px;
+  }
+}
