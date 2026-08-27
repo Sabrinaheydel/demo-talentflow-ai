@@ -27,11 +27,17 @@ export function TopHeader({
 
   return (
     <header className="top-header">
-      <div>
+      <div className="top-header__intro">
         <p className="eyebrow">
           {language === "en" ? "Executive overview" : "Vue d’ensemble exécutive"}
         </p>
         <h1>{language === "en" ? "TalentFlow recruitment HQ" : "Quartier général RH TalentFlow"}</h1>
+        <p className="public-beta-badge">
+          <span className="public-beta-badge__dot" aria-hidden="true" />
+          {language === "en"
+            ? "Public beta · Simulated recruitment data"
+            : "Bêta publique · Données de recrutement simulées"}
+        </p>
       </div>
 
       <div className="top-header__actions">
