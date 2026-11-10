@@ -4,6 +4,18 @@ TalentFlow is a premium bilingual recruitment product demo built with Next.js, T
 
 > **Portfolio demo:** candidate profiles, recruitment activity, product state, and Copilot outputs are simulated. TalentFlow does not currently process real candidate data or call a live AI provider.
 
+## Use case framing
+
+| | |
+|---|---|
+| **Business need** | Recruiters juggle an ATS, email, notes and calendars. Priorities, candidate evidence and next actions are scattered, which slows decisions. |
+| **Target users** | In-house recruiters and hiring managers in growing companies. |
+| **Data** | Candidate profiles, pipeline stages, interview slots and team feedback. In this demo, all data is simulated. |
+| **Scope** | 6 screens (briefing, pipeline, candidate, Copilot, interviews, team), one guided demo story, EN/FR. |
+| **Expected value** | Hypothesis to validate with early adopters: **2 to 4 hours saved per recruiter per week** on candidate preparation, interview coordination and feedback consolidation. Not measured yet. |
+| **How success is measured** | Time to prepare a shortlist, time to prepare an interview, guided demo completion rate (tracked in PostHog). |
+| **Guardrails** | No real candidate data, no live AI calls, every action previewed before it runs. |
+
 ## Product story
 
 A recruiter can:
@@ -58,9 +70,12 @@ src/
     analytics.ts
 
 docs/
-  docs/project-context.md
+  README.md                 documentation index
+  project-context.md
   product-operating-system.md
   production-readiness.md
+  release-gate.md
+  archive/                  historical beta-branch notes
 .github/
   agents/
   workflows/quality.yml
@@ -118,7 +133,8 @@ No production deployment is triggered by the production-readiness branch itself.
 
 ## Product and engineering documentation
 
-- `docs/docs/project-context.md` — product vision, demo story, scope, decision logs, and sprint context
+- `docs/README.md` — index of all product, release and QA documents
+- `docs/project-context.md` — product vision, demo story, scope, decision logs, and sprint context
 - `docs/product-operating-system.md` — product principles and operating rules
 - `docs/production-readiness.md` — launch, repository, privacy, observability, and quality checklist
 
